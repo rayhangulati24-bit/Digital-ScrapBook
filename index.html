@@ -9,25 +9,24 @@
 <style>
 :root{--navy:#14213D;--navy2:#1B2A4A;--ink:#F6F3EC;--pale:#AFC3E6;--tape:rgba(246,243,236,.82)}
 *{box-sizing:border-box}
+html,body{overflow-x:hidden}
 body{margin:0;background:var(--navy);color:var(--ink);font-family:'Patrick Hand','Comic Sans MS',cursive;font-size:18px;min-height:100vh;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
 [hidden]{display:none!important}
-header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;padding:16px 20px 6px}
-h1{font-family:'Caveat',cursive;font-size:clamp(38px,7vw,60px);margin:0;line-height:1;transform:rotate(-1.5deg)}
-h1 svg{display:block;width:100%;height:12px;margin-top:2px}
-.hr{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.count{font-family:'Caveat',cursive;font-size:24px;text-align:right;cursor:pointer;border:2px dashed var(--pale);border-radius:14px 6px 16px 8px;padding:4px 14px;background:none;color:var(--ink)}
-.count b{font-size:38px;color:var(--pale)}
-nav{display:flex;gap:8px;padding:8px 20px;overflow-x:auto}
-.tab,.tool{font:inherit;color:var(--ink);background:none;border:2px solid var(--ink);padding:5px 14px;border-radius:255px 12px 225px 12px/12px 225px 12px 255px;cursor:pointer;white-space:nowrap}
-.tab[aria-selected=true]{background:var(--ink);color:var(--navy)}
-.tool:hover,.tab:hover{transform:rotate(-2deg)}
-.tools{display:flex;flex-wrap:wrap;gap:8px;padding:4px 20px 12px}
+header{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 16px 4px}
+.tab,.tool{font:inherit;color:var(--ink);background:none;border:2px solid var(--ink);padding:5px 16px;border-radius:255px 12px 225px 12px/12px 225px 12px 255px;cursor:pointer;white-space:nowrap}
 .tool{border-style:dashed;border-color:var(--pale)}
-#board{position:relative;margin:0 12px 24px;height:max(560px,calc(100vh - 230px));border-radius:10px;overflow:hidden;
- background-color:var(--navy2);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
- border:3px solid var(--ink);touch-action:none}
+.tool:hover,.tab:hover{transform:rotate(-2deg)}
+#edit{border-style:solid;border-color:var(--ink)}
+#edit[aria-pressed=true]{background:var(--ink);color:var(--navy)}
+.small{padding:3px 12px;font-size:16px;opacity:.85}
+.tools{display:flex;flex-wrap:wrap;gap:8px;padding:6px 16px 10px}
+#stage{position:relative;perspective:2200px;margin:0 12px 10px;height:max(540px,calc(100vh - 190px))}
+.sheet{position:absolute;inset:0;border-radius:10px;border:3px solid var(--ink);overflow:hidden;transform-origin:left center;backface-visibility:hidden;-webkit-backface-visibility:hidden;touch-action:pan-y;
+ background-color:var(--navy2);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+.sheet.turning{transition:transform .95s cubic-bezier(.55,.1,.25,1);box-shadow:-18px 0 30px rgba(0,0,0,.45)}
 .empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:'Caveat',cursive;font-size:30px;color:var(--pale);pointer-events:none;padding:24px}
-.item{position:absolute;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.item{position:absolute;touch-action:none;user-select:none;-webkit-user-select:none}
+.editing .item{cursor:grab}
 .item.drag{cursor:grabbing;z-index:99999!important;filter:drop-shadow(0 10px 8px rgba(0,0,0,.35))}
 .item.stuck{animation:stick .25s}
 @keyframes stick{50%{transform:var(--t) scale(1.05)}}
@@ -42,23 +41,42 @@ nav{display:flex;gap:8px;padding:8px 20px;overflow-x:auto}
 .sticker svg{width:70px;height:70px;fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .sketch img{width:240px;display:block;pointer-events:none}
 .x{position:absolute;top:-10px;right:-10px;width:26px;height:26px;border-radius:50%;border:2px solid var(--navy);background:var(--ink);color:var(--navy);font:700 15px/1 sans-serif;cursor:pointer;display:none;z-index:5}
-.item:hover .x,.item:focus-within .x{display:block}
+.editing .item:hover .x,.editing .item:focus-within .x{display:block}
+/* cover */
+.cover{background:#fff;border-color:var(--navy);color:var(--navy);display:grid;place-items:center;text-align:center;padding:8%}
+.cover .cb{position:absolute;inset:14px;width:calc(100% - 28px);height:calc(100% - 28px);fill:none;stroke:var(--navy);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
+.cover .tape{background:repeating-linear-gradient(90deg,rgba(20,33,61,.85) 0 8px,rgba(175,195,230,.9) 8px 14px)}
+.cover .t1{left:14%;transform:rotate(-8deg)}.cover .t2{left:auto;right:6%;margin:0;transform:rotate(6deg)}
+.cover input{display:block;width:100%;border:0;background:none;text-align:center;font-family:'Caveat',cursive;color:var(--navy);padding:0;border-radius:6px}
+#ct{font-size:clamp(50px,12vw,120px);font-weight:700;line-height:1}
+#cs{font-size:clamp(24px,4vw,36px);margin-top:10px}
+.editing .cover input{outline:2px dashed #8fa6d1;outline-offset:4px}
+.cover .ul{width:min(420px,70%);height:14px;margin:6px auto 0;display:block}
+.cs{position:absolute;pointer-events:none}.cs svg{width:76px;height:76px;fill:none;stroke:var(--navy);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.cover .chint{position:absolute;bottom:34px;left:0;right:0;font-family:'Caveat',cursive;font-size:26px;color:#5d7099}
+/* controls */
+#ctrl{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:2px 12px 18px}
+#lbl{font-family:'Caveat',cursive;font-size:26px;min-width:150px;text-align:center}
+.tool:disabled{opacity:.35;cursor:default}
 dialog{background:var(--navy2);color:var(--ink);border:3px solid var(--ink);border-radius:14px;padding:16px;max-width:96vw}
 dialog::backdrop{background:rgba(8,14,30,.7)}
 canvas{background:var(--navy);border:2px dashed var(--pale);border-radius:8px;touch-action:none;max-width:100%;display:block;cursor:crosshair}
 .row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-input[type=date],.field{font:inherit;background:var(--navy);color:var(--ink);border:2px solid var(--pale);border-radius:8px;padding:6px 10px;color-scheme:dark;width:100%;margin:4px 0 10px}
+.field{font:inherit;background:var(--navy);color:var(--ink);border:2px solid var(--pale);border-radius:8px;padding:6px 10px;width:100%;margin:4px 0 10px}
 #login{max-width:340px;margin:12vh auto;padding:0 20px;text-align:center}
-#login h1{display:inline-block;margin-bottom:20px}
+#login h1{font-family:'Caveat',cursive;font-size:56px;margin:0 0 20px;transform:rotate(-1.5deg)}
 #msg{color:var(--pale);min-height:1.4em}
+#err{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 12px);z-index:100000;background:var(--ink);color:var(--navy);border:3px solid var(--pale);border-radius:10px;padding:12px 16px}
 :focus-visible{outline:3px solid var(--pale);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){.item.stuck{animation:none}.tool:hover,.tab:hover{transform:none}}
+@media (prefers-reduced-motion:reduce){.item.stuck{animation:none}.tool:hover{transform:none}}
 </style>
 </head>
 <body>
 
+<div id="err" role="alert" hidden></div>
+
 <section id="login" hidden>
- <h1>our scrapbook<svg viewBox="0 0 300 12" preserveAspectRatio="none"><path d="M2 7 C40 1 70 11 110 6 S190 2 230 7 S280 9 298 4" fill="none" stroke="#F6F3EC" stroke-width="3" stroke-linecap="round"/></svg></h1>
+ <h1>our scrapbook</h1>
  <form id="lf">
   <input class="field" id="em" type="email" placeholder="email" autocomplete="username" required>
   <input class="field" id="pw" type="password" placeholder="password" autocomplete="current-password" required>
@@ -69,43 +87,53 @@ input[type=date],.field{font:inherit;background:var(--navy);color:var(--ink);bor
 
 <div id="app" hidden>
  <header>
-  <h1>our scrapbook<svg viewBox="0 0 300 12" preserveAspectRatio="none"><path d="M2 7 C40 1 70 11 110 6 S190 2 230 7 S280 9 298 4" fill="none" stroke="#F6F3EC" stroke-width="3" stroke-linecap="round"/></svg></h1>
-  <div class="hr">
-   <button class="count" id="count" title="Set the date you’ll see each other"></button>
-   <button class="tool" id="out">sign out</button>
-  </div>
+  <button class="tool small" id="out">sign out</button>
+  <button class="tab" id="edit" aria-pressed="false">edit</button>
  </header>
- <nav id="tabs" role="tablist" aria-label="Pages"></nav>
- <div class="tools">
-  <button class="tool" id="addNote">+ note</button>
-  <button class="tool" id="addPhoto">+ photo</button>
-  <button class="tool" id="addDoodle">+ doodle</button>
-  <button class="tool" id="addSticker">+ sticker</button>
+ <div class="tools" id="tools" hidden>
+  <button class="tool itm" id="addNote">+ note</button>
+  <button class="tool itm" id="addPhoto">+ photo</button>
+  <button class="tool itm" id="addDoodle">+ doodle</button>
+  <button class="tool itm" id="addSticker">+ sticker</button>
   <button class="tool" id="addPage">+ page</button>
+  <button class="tool itm" id="ren">rename page</button>
+  <button class="tool itm" id="del">remove page</button>
   <input type="file" id="file" accept="image/*" hidden>
  </div>
- <main id="board" aria-label="Scrapbook page"></main>
+ <main id="stage" aria-live="polite"></main>
+ <div id="ctrl">
+  <button class="tool" id="prev" aria-label="Previous page">‹ back</button>
+  <span id="lbl"></span>
+  <button class="tool" id="next" aria-label="Next page">next ›</button>
+  <button class="tool" id="play" aria-pressed="false">▶ slideshow</button>
+ </div>
 </div>
 
 <dialog id="dlg">
  <canvas id="cv" width="320" height="240"></canvas>
  <div class="row"><button class="tool" id="clr">clear</button><button class="tool" id="drop">stick it on the page</button><button class="tool" id="cancel">cancel</button></div>
 </dialog>
-<dialog id="dateDlg">
- <label>Next time we’re together:<br><input type="date" id="dateIn"></label>
- <div class="row"><button class="tool" id="dateSave">save</button><button class="tool" id="dateCancel">cancel</button></div>
-</dialog>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" crossorigin="anonymous"></script>
 <script src="config.js"></script>
 <script>
 const $=s=>document.querySelector(s);
+function fail(m){const b=document.getElementById('err');if(b.hidden){b.hidden=false;b.textContent=m}}
+addEventListener('error',e=>fail('Something went wrong: '+(e.message||'unknown error')+(e.lineno?' (line '+e.lineno+')':'')));
+addEventListener('unhandledrejection',e=>fail('Something went wrong: '+((e.reason&&e.reason.message)||e.reason)));
 const C=window.SCRAPBOOK||{};
-const sb=supabase.createClient(C.url,C.key);
-let S={pages:[],items:[],cur:null,date:''},me=null,started=false;
+let sb;
+if(typeof supabase==='undefined')fail('The Supabase library didn’t load. Check your internet connection and try again.');
+else if(!C.url||!C.key||/YOUR-/.test(C.url+C.key))fail('config.js is missing or still has the placeholder text. Open it in your GitHub repo and paste in your Supabase URL and anon key.');
+else{try{sb=supabase.createClient(C.url,C.key)}catch(e){fail('Couldn’t connect to Supabase: '+e.message)}}
+if(!sb)throw new Error('Not connected');
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let S={pages:[],items:[],cover:{title:'our scrapbook',sub:'for us, wherever we are'}},me=null,started=false;
+let idx=0,editing=false,busy=false,playT=null;
 const urls={},pending={},timers={};
 const uid=()=>Math.random().toString(36).slice(2,10);
 const rot=()=>Math.round((Math.random()*10-5)*10)/10;
+const total=()=>S.pages.length+1;
 const ST={
  star:'<path d="M35 8l8 18 19 2-14 13 4 19-17-10-17 10 4-19L8 28l19-2z"/>',
  heart:'<path d="M35 58C10 40 8 22 20 14c7-4 13 0 15 6 2-6 8-10 15-6 12 8 10 26-15 44z"/>',
@@ -119,7 +147,7 @@ $('#lf').onsubmit=async e=>{e.preventDefault();$('#msg').textContent='opening…
  const{error}=await sb.auth.signInWithPassword({email:$('#em').value.trim(),password:$('#pw').value});
  $('#msg').textContent=error?'That email or password didn’t work.':''};
 $('#out').onclick=()=>sb.auth.signOut();
-sb.auth.onAuthStateChange((_ev,session)=>{
+sb.auth.onAuthStateChange((_e,session)=>{
  me=session?session.user:null;
  $('#login').hidden=!!me;$('#app').hidden=!me;
  if(me&&!started){started=true;start()}
@@ -128,39 +156,39 @@ sb.auth.onAuthStateChange((_ev,session)=>{
 sb.auth.getSession().then(({data})=>{if(!data.session)$('#login').hidden=false});
 
 // ---------- load + live sync ----------
+function readSettings(rows){(rows||[]).forEach(r=>{if(r.key==='cover_title')S.cover.title=r.value;if(r.key==='cover_sub')S.cover.sub=r.value})}
 async function start(){
  let p=await sb.from('pages').select().order('position');
  if(!p.data||!p.data.length){
   await sb.from('pages').insert([{name:'us',position:0},{name:'dates',position:1},{name:'dreams',position:2}]);
   p=await sb.from('pages').select().order('position');
  }
- const[i,s]=await Promise.all([sb.from('items').select(),sb.from('settings').select().eq('key','countdown')]);
- S.pages=p.data||[];S.items=i.data||[];S.date=(s.data&&s.data[0]&&s.data[0].value)||'';
- S.cur=S.cur&&S.pages.some(x=>x.id===S.cur)?S.cur:(S.pages[0]&&S.pages[0].id);
- render();
+ const[i,s]=await Promise.all([sb.from('items').select(),sb.from('settings').select()]);
+ S.pages=p.data||[];S.items=i.data||[];readSettings(s.data);
+ show();
  sb.channel('scrap')
   .on('postgres_changes',{event:'*',schema:'public',table:'items'},pl=>{
    if(pl.eventType==='DELETE')S.items=S.items.filter(o=>o.id!==pl.old.id);
    else{const k=S.items.findIndex(o=>o.id===pl.new.id);if(k<0)S.items.push(pl.new);else if(!pending[pl.new.id])S.items[k]=pl.new}
    soft()})
   .on('postgres_changes',{event:'*',schema:'public',table:'pages'},async()=>{
-   const r=await sb.from('pages').select().order('position');S.pages=r.data||S.pages;soft()})
-  .on('postgres_changes',{event:'*',schema:'public',table:'settings'},pl=>{
-   if(pl.new&&pl.new.key==='countdown'){S.date=pl.new.value;soft()}})
+   const r=await sb.from('pages').select().order('position');S.pages=r.data||S.pages;idx=Math.min(idx,S.pages.length);soft();label()})
+  .on('postgres_changes',{event:'*',schema:'public',table:'settings'},pl=>{if(pl.new)readSettings([pl.new]);soft()})
   .subscribe();
 }
-function soft(){const a=document.activeElement;if(a&&a.closest&&a.closest('#board')&&a.matches('input,textarea'))return;render()}
+function soft(){const a=document.activeElement;if(busy||(a&&a.closest&&a.closest('#stage')&&a.matches('input,textarea')))return;refresh()}
 
 // ---------- saving ----------
 function patch(it,f){Object.assign(it,f);pending[it.id]=Object.assign(pending[it.id]||{},f);
  clearTimeout(timers[it.id]);timers[it.id]=setTimeout(async()=>{const d=pending[it.id];delete pending[it.id];
   await sb.from('items').update(d).eq('id',it.id)},500)}
-async function add(o){const b=$('#board').getBoundingClientRect();
- const row=Object.assign({page:S.cur,x:30+Math.random()*Math.max(40,b.width-280),y:30+Math.random()*Math.max(40,b.height-300),r:rot(),z:Math.max(0,...S.items.map(i=>i.z||0))+1},o);
+function saveSetting(key,value){clearTimeout(timers[key]);timers[key]=setTimeout(()=>sb.from('settings').upsert({key,value}),600)}
+async function add(o){const b=$('#stage').getBoundingClientRect();
+ const row=Object.assign({page:S.pages[idx-1].id,x:30+Math.random()*Math.max(40,b.width-280),y:30+Math.random()*Math.max(40,b.height-300),r:rot(),z:Math.max(0,...S.items.map(i=>i.z||0))+1},o);
  const{data,error}=await sb.from('items').insert(row).select().single();
  if(error){alert('Couldn’t save that: '+error.message);return}
- if(!S.items.some(i=>i.id===data.id))S.items.push(data);render()}
-async function remove(it){S.items=S.items.filter(o=>o!==it);render();
+ if(!S.items.some(i=>i.id===data.id))S.items.push(data);refresh()}
+async function remove(it){S.items=S.items.filter(o=>o!==it);refresh();
  await sb.from('items').delete().eq('id',it.id);
  if(it.img_path)sb.storage.from('photos').remove([it.img_path])}
 async function sign(path){if(urls[path])return urls[path];
@@ -170,29 +198,37 @@ async function upload(blob,ext){const path=`${me.id}/${uid()}.${ext}`;
  const{error}=await sb.storage.from('photos').upload(path,blob,{contentType:blob.type});
  if(error){alert('Upload failed: '+error.message);return null}return path}
 
-// ---------- render ----------
-function render(){
- const tabs=$('#tabs');tabs.innerHTML='';
- S.pages.forEach(p=>{const b=document.createElement('button');b.className='tab';b.role='tab';b.textContent=p.name;
-  b.setAttribute('aria-selected',p.id===S.cur);b.onclick=()=>{S.cur=p.id;render()};
-  b.ondblclick=async()=>{const n=prompt('Rename page',p.name);if(n&&n.trim()){p.name=n.trim();await sb.from('pages').update({name:p.name}).eq('id',p.id);render()}};tabs.append(b)});
- const board=$('#board');board.innerHTML='';
- const items=S.items.filter(i=>i.page===S.cur);
- if(!items.length)board.innerHTML='<div class="empty">a blank page.<br>add a note, a photo or a doodle above.</div>';
- items.forEach(it=>board.append(el(it)));
- const c=$('#count');
- if(S.date){const d=Math.ceil((new Date(S.date+'T00:00:00')-new Date().setHours(0,0,0,0))/864e5);
-  c.innerHTML=d>0?`<b>${d}</b> day${d==1?'':'s'} until we’re together`:d==0?'<b>today!</b> we’re together':'we were together '+(-d)+' days ago'}
- else c.innerHTML='set our countdown';
+// ---------- sheets ----------
+function sheet(i){
+ const d=document.createElement('div');
+ if(i===0){d.className='sheet cover';
+  d.innerHTML=`<svg class="cb" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M1 2 C25 0 60 3 99 1 S100 40 98 99 C70 100 30 98 2 99 S0 60 1 2Z"/></svg>
+  <i class="tape t1"></i><i class="tape t2"></i>
+  <div style="width:100%"><input id="ct" maxlength="40" aria-label="Cover title"><svg class="ul" viewBox="0 0 300 14" preserveAspectRatio="none"><path d="M2 8 C40 2 70 12 110 7 S190 3 230 8 S280 10 298 5" fill="none" stroke="#14213D" stroke-width="3" stroke-linecap="round"/></svg><input id="cs" maxlength="60" aria-label="Cover subtitle"></div>
+  <div class="cs" style="top:9%;left:8%;transform:rotate(-12deg)"><svg viewBox="0 0 70 70">${ST.star}</svg></div>
+  <div class="cs" style="top:12%;right:9%;transform:rotate(10deg)"><svg viewBox="0 0 70 70">${ST.plane}</svg></div>
+  <div class="cs" style="bottom:14%;left:10%;transform:rotate(8deg)"><svg viewBox="0 0 70 70">${ST.moon}</svg></div>
+  <div class="cs" style="bottom:13%;right:11%;transform:rotate(-8deg)"><svg viewBox="0 0 70 70">${ST.heart}</svg></div>
+  <p class="chint">open it up →</p>`;
+  const t=d.querySelector('#ct'),s=d.querySelector('#cs');
+  t.value=S.cover.title;s.value=S.cover.sub;t.readOnly=s.readOnly=!editing;
+  t.oninput=()=>{S.cover.title=t.value;saveSetting('cover_title',t.value)};
+  s.oninput=()=>{S.cover.sub=s.value;saveSetting('cover_sub',s.value)};
+ }else{d.className='sheet';
+  const p=S.pages[i-1],items=S.items.filter(o=>o.page===p.id);
+  if(!items.length)d.innerHTML=`<div class="empty">${editing?'a blank page.<br>add a note, a photo or a doodle above.':'(nothing here yet)'}</div>`;
+  items.forEach(it=>d.append(el(it)));
+ }
+ return d;
 }
 function el(it){
  const d=document.createElement('div');d.className='item '+it.type;
  const t=`rotate(${it.r}deg)`;d.style.cssText=`left:${it.x}px;top:${it.y}px;z-index:${(it.z||0)+1};transform:${t};--t:${t}`;
- if(it.type==='polaroid'){d.className+=' polaroid';d.innerHTML='<i class="tape"></i><img alt=""><input maxlength="40" placeholder="caption" aria-label="Caption">';
+ if(it.type==='polaroid'){d.className+=' polaroid';d.innerHTML='<i class="tape"></i><img alt=""><input maxlength="40" aria-label="Caption">';
   sign(it.img_path).then(u=>{if(u)d.querySelector('img').src=u});
-  const i=d.querySelector('input');i.value=it.text||'';i.oninput=()=>patch(it,{text:i.value})}
- else if(it.type==='note'){d.className+=' note'+(it.blue?' blue':'');d.innerHTML='<i class="tape"></i><textarea placeholder="write something…" aria-label="Note"></textarea>';
-  const a=d.querySelector('textarea');a.value=it.text||'';a.oninput=()=>patch(it,{text:a.value})}
+  const i=d.querySelector('input');i.value=it.text||'';i.readOnly=!editing;if(editing)i.placeholder='caption';if(!editing&&!it.text)i.style.display='none';i.oninput=()=>patch(it,{text:i.value})}
+ else if(it.type==='note'){d.className+=' note'+(it.blue?' blue':'');d.innerHTML='<i class="tape"></i><textarea aria-label="Note"></textarea>';
+  const a=d.querySelector('textarea');a.value=it.text||'';a.readOnly=!editing;if(editing)a.placeholder='write something…';a.oninput=()=>patch(it,{text:a.value})}
  else if(it.type==='sticker')d.innerHTML=`<svg viewBox="0 0 70 70">${ST[it.k]||ST.star}</svg>`;
  else if(it.type==='sketch'){d.innerHTML='<img alt="A doodle">';sign(it.img_path).then(u=>{if(u)d.querySelector('img').src=u})}
  const x=document.createElement('button');x.className='x';x.textContent='×';x.setAttribute('aria-label','Remove');
@@ -201,8 +237,8 @@ function el(it){
 }
 function drag(d,it){
  d.addEventListener('pointerdown',e=>{
-  if(e.target.matches('input,textarea,button'))return;
-  const b=$('#board').getBoundingClientRect();const ox=e.clientX-it.x-b.left,oy=e.clientY-it.y-b.top;
+  if(!editing||e.target.matches('input,textarea,button'))return;
+  const b=d.parentElement.getBoundingClientRect();const ox=e.clientX-it.x-b.left,oy=e.clientY-it.y-b.top;
   d.setPointerCapture(e.pointerId);d.classList.add('drag');
   it.z=Math.max(0,...S.items.map(o=>o.z||0))+1;
   const mv=ev=>{it.x=Math.max(-40,Math.min(b.width-60,ev.clientX-b.left-ox));it.y=Math.max(-20,Math.min(b.height-60,ev.clientY-b.top-oy));
@@ -213,12 +249,63 @@ function drag(d,it){
  });
 }
 
+// ---------- showing + flipping ----------
+function label(){
+ $('#lbl').textContent=idx===0?'cover':`${S.pages[idx-1]?S.pages[idx-1].name:''}  ·  ${idx} / ${S.pages.length}`;
+ $('#prev').disabled=idx===0;$('#next').disabled=idx>=total()-1;
+ document.querySelectorAll('.itm').forEach(b=>b.hidden=idx===0);
+}
+function show(){const st=$('#stage');st.innerHTML='';st.append(sheet(idx));label()}
+function refresh(){const st=$('#stage');const old=st.querySelector('.sheet');if(!old||busy){show();return}
+ const n=sheet(idx);st.replaceChild(n,old);label()}
+function go(to){
+ if(busy||to<0||to>=total()||to===idx)return;
+ const st=$('#stage'),old=st.querySelector('.sheet'),dir=to>idx?1:-1;
+ idx=to;const nw=sheet(to);label();
+ if(reduced||!old){st.innerHTML='';st.append(nw);return}
+ busy=true;
+ const raf2=f=>requestAnimationFrame(()=>requestAnimationFrame(f));
+ if(dir>0){nw.style.zIndex=1;old.style.zIndex=2;st.append(nw);old.classList.add('turning');
+  raf2(()=>old.style.transform='rotateY(-172deg)');
+  setTimeout(()=>{old.remove();busy=false},1000)}
+ else{nw.style.zIndex=3;old.style.zIndex=1;nw.style.transform='rotateY(-172deg)';nw.classList.add('turning');st.append(nw);
+  raf2(()=>nw.style.transform='rotateY(0deg)');
+  setTimeout(()=>{old.remove();nw.classList.remove('turning');nw.style.transform='';busy=false},1000)}
+}
+$('#next').onclick=()=>go(idx+1);
+$('#prev').onclick=()=>go(idx-1);
+addEventListener('keydown',e=>{if(e.target.matches('input,textarea'))return;if(e.key==='ArrowRight')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+let sx=null;
+$('#stage').addEventListener('pointerdown',e=>{sx=editing?null:e.clientX});
+$('#stage').addEventListener('pointerup',e=>{if(sx!==null&&Math.abs(e.clientX-sx)>60)go(idx+(e.clientX<sx?1:-1));sx=null});
+
+// slideshow
+function stopPlay(){clearInterval(playT);playT=null;$('#play').setAttribute('aria-pressed','false');$('#play').textContent='▶ slideshow'}
+$('#play').onclick=()=>{if(playT){stopPlay();return}
+ if(editing)return;
+ $('#play').setAttribute('aria-pressed','true');$('#play').textContent='❚❚ pause';
+ playT=setInterval(()=>go(idx>=total()-1?0:idx+1),5000)};
+
+// edit mode
+$('#edit').onclick=()=>{editing=!editing;stopPlay();
+ $('#edit').setAttribute('aria-pressed',editing);$('#edit').textContent=editing?'done':'edit';
+ $('#tools').hidden=!editing;$('#stage').classList.toggle('editing',editing);$('#play').disabled=editing;refresh()};
+
 // ---------- toolbar ----------
 $('#addNote').onclick=()=>add({type:'note',text:'',blue:Math.random()<.4});
 $('#addSticker').onclick=()=>add({type:'sticker',k:stKeys[stI++%stKeys.length]});
 $('#addPage').onclick=async()=>{const n=prompt('Name the new page');if(!n||!n.trim())return;
  const{data}=await sb.from('pages').insert({name:n.trim(),position:S.pages.length}).select().single();
- if(data){if(!S.pages.some(p=>p.id===data.id))S.pages.push(data);S.cur=data.id;render()}};
+ if(data){if(!S.pages.some(p=>p.id===data.id))S.pages.push(data);go(S.pages.length)}};
+$('#ren').onclick=async()=>{if(idx<1)return;const p=S.pages[idx-1];const n=prompt('Rename page',p.name);
+ if(n&&n.trim()){p.name=n.trim();label();await sb.from('pages').update({name:p.name}).eq('id',p.id)}};
+$('#del').onclick=async()=>{if(idx<1)return;const p=S.pages[idx-1];
+ if(!confirm('Remove the page “'+p.name+'” and everything on it?'))return;
+ const paths=S.items.filter(i=>i.page===p.id).map(i=>i.img_path).filter(Boolean);
+ await sb.from('pages').delete().eq('id',p.id);
+ S.pages=S.pages.filter(x=>x!==p);S.items=S.items.filter(i=>i.page!==p.id);
+ if(paths.length)sb.storage.from('photos').remove(paths);
+ idx=Math.min(idx,S.pages.length);show()};
 $('#addPhoto').onclick=()=>$('#file').click();
 $('#file').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
  const im=new Image();im.onload=()=>{const k=Math.min(1,900/Math.max(im.width,im.height));const c=document.createElement('canvas');
@@ -237,12 +324,6 @@ $('#addDoodle').onclick=()=>{cx.clearRect(0,0,cv.width,cv.height);$('#dlg').show
 $('#clr').onclick=()=>cx.clearRect(0,0,cv.width,cv.height);
 $('#cancel').onclick=()=>$('#dlg').close();
 $('#drop').onclick=()=>{cv.toBlob(async b=>{const p=await upload(b,'png');if(p)add({type:'sketch',img_path:p});$('#dlg').close()},'image/png')};
-
-// countdown
-$('#count').onclick=()=>{$('#dateIn').value=S.date||'';$('#dateDlg').showModal()};
-$('#dateSave').onclick=async()=>{S.date=$('#dateIn').value;render();$('#dateDlg').close();
- await sb.from('settings').upsert({key:'countdown',value:S.date})};
-$('#dateCancel').onclick=()=>$('#dateDlg').close();
 </script>
 </body>
 </html>
