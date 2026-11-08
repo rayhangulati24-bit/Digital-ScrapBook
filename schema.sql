@@ -64,6 +64,6 @@ alter publication supabase_realtime add table pages, items, settings;
 
 -- >>> EDIT THESE TWO EMAILS (must match the accounts you create) <<<
 insert into allowed_emails (email) values
-  ('you@example.com'),
-  ('partner@example.com')
+  ('rayhangulati24@gmail.com'),
+  ('prabhuriya1@gmail.com')
 on conflict do nothing;
