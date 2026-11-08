@@ -23,6 +23,14 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 #stage{position:relative;perspective:2200px;margin:0 12px 10px;height:max(540px,calc(100vh - 190px))}
 .sheet{position:absolute;inset:0;border-radius:10px;border:3px solid var(--ink);overflow:hidden;transform-origin:left center;backface-visibility:hidden;-webkit-backface-visibility:hidden;touch-action:pan-y;
  background-color:var(--navy2);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+.sheet{--pl:rgba(246,243,236,.14);--pi:#F6F3EC;--bc:#F6F3EC}
+.sheet.light{--pl:rgba(20,33,61,.14);--pi:#14213D;--bc:#14213D}
+.sheet.light .empty{color:#5d7099}
+.sheet.pat-plain{background-image:none}
+.sheet.pat-dots{background-image:radial-gradient(var(--pl) 1.6px,transparent 1.8px);background-size:22px 22px}
+.sheet.pat-grid{background-image:linear-gradient(var(--pl) 1px,transparent 1px),linear-gradient(90deg,var(--pl) 1px,transparent 1px);background-size:28px 28px}
+.sheet.pat-lines{background-image:repeating-linear-gradient(transparent 0 31px,var(--pl) 31px 32px)}
+.pgb{position:absolute;inset:12px;width:calc(100% - 24px);height:calc(100% - 24px);fill:none;stroke:var(--bc);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
 .sheet.turning{transition:transform .95s cubic-bezier(.55,.1,.25,1);box-shadow:-18px 0 30px rgba(0,0,0,.45)}
 .empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:'Caveat',cursive;font-size:30px;color:var(--pale);pointer-events:none;padding:24px}
 .item{position:absolute;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -33,15 +41,17 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .polaroid{background:var(--ink);padding:10px 10px 8px;width:200px;box-shadow:0 4px 10px rgba(0,0,0,.35);color:var(--navy)}
 .polaroid img{display:block;width:100%;aspect-ratio:1;object-fit:cover;pointer-events:none;background:#ddd}
 .polaroid input{width:100%;border:0;background:none;font-family:'Caveat',cursive;font-size:22px;text-align:center;color:var(--navy);margin-top:4px;padding:0}
-.note{background:var(--ink);color:var(--navy);width:190px;padding:20px 14px 14px;box-shadow:0 4px 10px rgba(0,0,0,.3);clip-path:polygon(0 3%,6% 0,14% 2%,25% 0,38% 3%,50% 0,63% 2%,77% 0,90% 3%,100% 0,100% 100%,0 100%)}
+.note{color:var(--navy);width:190px;padding:20px 14px 14px;filter:drop-shadow(0 4px 5px rgba(0,0,0,.32))}
+.note::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--ink);clip-path:polygon(0 3%,6% 0,14% 2%,25% 0,38% 3%,50% 0,63% 2%,77% 0,90% 3%,100% 0,100% 100%,0 100%)}
 .note textarea{width:100%;min-height:100px;border:0;background:none;resize:none;font-family:'Caveat',cursive;font-size:24px;line-height:1.1;color:var(--navy);padding:0}
-.note.blue{background:var(--pale)}
+.note.blue::before{background:var(--pale)}
 .tape{position:absolute;top:-12px;left:50%;width:76px;height:24px;margin-left:-38px;transform:rotate(-4deg);pointer-events:none;
  background:repeating-linear-gradient(90deg,var(--tape1) 0 8px,var(--tape2) 8px 14px)}
-.sticker svg{width:70px;height:70px;fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.sticker svg{width:70px;height:70px;fill:none;stroke:var(--pi);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .sketch img{width:240px;display:block;pointer-events:none}
 .x{position:absolute;top:-10px;right:-10px;width:26px;height:26px;border-radius:50%;border:2px solid var(--navy);background:var(--ink);color:var(--navy);font:700 15px/1 sans-serif;cursor:pointer;display:none;z-index:5}
-.editing .item:hover .x,.editing .item:focus-within .x{display:block}
+.rot{position:absolute;top:-10px;left:-10px;width:26px;height:26px;border-radius:50%;border:2px solid var(--navy);background:var(--pale);color:var(--navy);font:700 15px/1 sans-serif;cursor:grab;display:none;z-index:5;padding:0;touch-action:none}
+.editing .item:hover .x,.editing .item:focus-within .x,.editing .item:hover .rot,.editing .item:focus-within .rot{display:block}
 /* cover */
 .cover{--cp:#fff;--ci:#14213D;--tape1:rgba(20,33,61,.85);--tape2:rgba(175,195,230,.9);background:var(--cp);border-color:var(--ci);color:var(--ci);display:grid;place-items:center;text-align:center;padding:8%}
 .cover.c-blue{--cp:#DCE6F7}
@@ -50,7 +60,7 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .cover .label textarea{color:var(--ci)}
 .washi{height:26px;box-shadow:0 2px 4px rgba(0,0,0,.2);background:repeating-linear-gradient(90deg,var(--tape1) 0 8px,var(--tape2) 8px 14px)}
 .label{width:200px}
-.label textarea{font-size:30px;color:var(--ink)}
+.label textarea{font-size:30px;color:var(--pi)}
 .cover .cb{position:absolute;inset:14px;width:calc(100% - 28px);height:calc(100% - 28px);fill:none;stroke:var(--ci);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
 .cover input{display:block;width:100%;border:0;background:none;text-align:center;font-family:'Caveat',cursive;color:var(--ci);padding:0;border-radius:6px}
 #ct{font-size:clamp(50px,12vw,120px);font-weight:700;line-height:1}
@@ -62,7 +72,7 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .sz{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);display:none;gap:6px}
 .sz button{width:26px;height:26px;border-radius:50%;border:2px solid var(--navy);background:var(--ink);color:var(--navy);font:700 16px/1 sans-serif;cursor:pointer;padding:0}
 .editing .item:hover .sz,.editing .item:focus-within .sz{display:flex}
-@media (hover:none){.editing .x{display:block}.editing .sz{display:flex}}
+@media (hover:none){.editing .x,.editing .rot{display:block}.editing .sz{display:flex}}
 #pick{width:min(520px,94vw);max-height:86vh;overflow:auto}
 .pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:8px;margin:8px 0 14px}
 .pk{background:none;border:2px dashed var(--pale);border-radius:10px;padding:6px;cursor:pointer}
@@ -76,7 +86,18 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .phrase.blue{background:var(--ink)}
 .phrase textarea,.label textarea{display:block;width:100%;border:0;background:none;resize:none;overflow:hidden;font-family:'Caveat',cursive;font-weight:700;font-size:26px;line-height:1.05;color:var(--navy);text-align:center;padding:0}
 .pickT{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
-.pk.txt{font-family:'Caveat',cursive;font-size:21px;line-height:1.05;color:var(--ink);padding:8px}
+.pk.txt{position:relative;font-family:'Caveat',cursive;font-weight:700;font-size:22px;line-height:1.05;color:var(--navy);background:var(--pale);border:2px dashed var(--navy);border-radius:4px 14px 6px 12px;padding:16px 10px 10px;text-align:center;box-shadow:0 3px 6px rgba(0,0,0,.3)}
+.pk.txt.w{background:var(--ink)}
+.pk.txt:hover{filter:brightness(1.08)}
+.pk.txt::before{content:"";position:absolute;top:-9px;left:50%;width:52px;height:16px;margin-left:-26px;transform:rotate(-4deg);background:repeating-linear-gradient(90deg,var(--tape1) 0 6px,var(--tape2) 6px 10px)}
+.pickT{gap:16px 12px;padding-top:6px}
+#sty{margin:auto auto 8px;max-height:62vh;overflow:auto;width:min(480px,94vw)}
+#sty::backdrop{background:rgba(8,14,30,.12)}
+.sw{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}
+.lbl{margin:6px 0 0;font-size:16px;color:var(--pale)}
+.swc{width:34px;height:34px;border-radius:50%;border:2px solid var(--ink);cursor:pointer;padding:0}
+#sty [aria-pressed=true]{outline:3px solid var(--pale);outline-offset:2px}
+#sty .tool.small[aria-pressed=true]{background:var(--ink);color:var(--navy)}
 /* controls */
 #ctrl{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:2px 12px 18px}
 #lbl{font-family:'Caveat',cursive;font-size:26px;min-width:150px;text-align:center}
@@ -120,6 +141,7 @@ canvas{background:var(--navy);border:2px dashed var(--pale);border-radius:8px;to
   <button class="tool itm" id="addSticker">+ stickers &amp; doodles</button>
   <button class="tool" id="addPage">+ page</button>
   <button class="tool pgonly" id="ren">rename page</button>
+  <button class="tool pgonly" id="stylePage" type="button">style page</button>
   <button class="tool pgonly" id="del">remove page</button>
   <button class="tool cvonly" id="cvFrame" type="button"></button>
   <button class="tool cvonly" id="cvUl" type="button"></button>
@@ -146,6 +168,14 @@ canvas{background:var(--navy);border:2px dashed var(--pale);border-radius:8px;to
  <h2 class="dlgh">start a new page</h2><div id="tplList"></div>
  <div class="row"><button class="tool" id="tplX">cancel</button></div>
 </dialog>
+<dialog id="sty">
+ <h2 class="dlgh">style this page</h2>
+ <p class="lbl">paper colour</p><div class="sw" id="swBg"></div>
+ <p class="lbl">pattern</p><div class="sw" id="swPat"></div>
+ <p class="lbl">border</p><div class="sw" id="swBd"></div>
+ <p class="lbl">border colour</p><div class="sw" id="swBc"></div>
+ <div class="row"><button class="tool" id="styReset" type="button">reset</button><button class="tool" id="styDone" type="button">done</button></div>
+</dialog>
 <dialog id="dlg">
  <canvas id="cv" width="320" height="240"></canvas>
  <div class="row"><button class="tool" id="clr">clear</button><button class="tool" id="drop">stick it on the page</button><button class="tool" id="cancel">cancel</button></div>
@@ -165,7 +195,7 @@ else if(!C.url||!C.key||/YOUR-/.test(C.url+C.key))fail('config.js is missing or 
 else{try{sb=supabase.createClient(C.url,C.key)}catch(e){fail('Couldn’t connect to Supabase: '+e.message)}}
 if(!sb)throw new Error('Not connected');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let S={pages:[],items:[],cover:{title:'our scrapbook',sub:'for us, wherever we are',frame:true,ul:true,paper:'white'}},me=null,started=false;
+let S={pages:[],items:[],styles:{},cover:{title:'our scrapbook',sub:'for us, wherever we are',frame:true,ul:true,paper:'white'}},me=null,started=false;
 let idx=0,editing=false,busy=false,playT=null;
 const urls={},pending={},timers={};
 const uid=()=>Math.random().toString(36).slice(2,10);
@@ -203,6 +233,10 @@ Object.assign(ST,{
 const STICKERS=['star','heart','plane','moon','sun','cloud','flower','camera','envelope','coffee','key','crown','music','balloon','house','smile'];
 const DOODLES=['arrow','squiggle','underline','sparkle','dots','burst','bolt','hearts','scribble'];
 let slotTarget=null;
+const BGS={navy:'#1B2A4A',midnight:'#0E1830',ocean:'#2D4F86',sky:'#DCE6F7',white:'#FFFFFF'},LIGHT={sky:1,white:1};
+const BCS={pale:'#AFC3E6',white:'#FFFFFF',navy:'#14213D',ocean:'#2D4F86'};
+const BORDERS={none:'0 none',thin:'1.5px solid',solid:'3px solid',thick:'7px solid',dashed:'3px dashed',dotted:'4px dotted',double:'6px double',doodle:'0 none'};
+const pstyle=id=>Object.assign({bg:'navy',pat:'grain',bd:'solid',bc:'auto'},S.styles[id]||{});
 
 // ---------- auth ----------
 $('#lf').onsubmit=async e=>{e.preventDefault();$('#msg').textContent='opening…';
@@ -218,7 +252,7 @@ sb.auth.onAuthStateChange((_e,session)=>{
 sb.auth.getSession().then(({data})=>{if(!data.session)$('#login').hidden=false});
 
 // ---------- load + live sync ----------
-function readSettings(rows){(rows||[]).forEach(r=>{if(r.key==='cover_title')S.cover.title=r.value;if(r.key==='cover_sub')S.cover.sub=r.value;if(r.key==='cover_frame')S.cover.frame=r.value!=='0';if(r.key==='cover_ul')S.cover.ul=r.value!=='0';if(r.key==='cover_paper')S.cover.paper=r.value})}
+function readSettings(rows){(rows||[]).forEach(r=>{if(r.key.startsWith('pstyle:')){try{S.styles[r.key.slice(7)]=JSON.parse(r.value)}catch(e){}}if(r.key==='cover_title')S.cover.title=r.value;if(r.key==='cover_sub')S.cover.sub=r.value;if(r.key==='cover_frame')S.cover.frame=r.value!=='0';if(r.key==='cover_ul')S.cover.ul=r.value!=='0';if(r.key==='cover_paper')S.cover.paper=r.value})}
 async function start(){
  let p=await sb.from('pages').select().order('position');
  if(!p.data||!p.data.length){
@@ -283,10 +317,13 @@ function sheet(i){
   t.oninput=()=>{S.cover.title=t.value;saveSetting('cover_title',t.value)};
   s.oninput=()=>{S.cover.sub=s.value;saveSetting('cover_sub',s.value)};
   S.items.filter(o=>!o.page).forEach(it=>d.append(el(it)));
- }else{d.className='sheet';
-  const p=S.pages[i-1],items=S.items.filter(o=>o.page===p.id);
+ }else{const p=S.pages[i-1],items=S.items.filter(o=>o.page===p.id),ps=pstyle(p.id),light=!!LIGHT[ps.bg];
+  d.className='sheet pat-'+ps.pat+(light?' light':'');d.style.backgroundColor=BGS[ps.bg]||BGS.navy;
+  const bcol=ps.bc==='auto'?(light?'#14213D':'#F6F3EC'):(BCS[ps.bc]||'#F6F3EC');d.style.setProperty('--bc',bcol);
+  d.style.border=(BORDERS[ps.bd]||BORDERS.solid)+' '+bcol;
   if(!items.length)d.innerHTML=`<div class="empty">${editing?'a blank page.<br>add a note, a photo or a doodle above.':'(nothing here yet)'}</div>`;
   items.forEach(it=>d.append(el(it)));
+  if(ps.bd==='doodle')d.insertAdjacentHTML('afterbegin','<svg class="pgb" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M1 2 C25 0 60 3 99 1 S100 40 98 99 C70 100 30 98 2 99 S0 60 1 2Z"/></svg>');
  }
  return d;
 }
@@ -317,6 +354,15 @@ function el(it){
  else if(it.type==='sketch'){d.innerHTML='<img alt="A doodle">';sign(it.img_path).then(u=>{if(u)d.querySelector('img').src=u})}
  const x=document.createElement('button');x.className='x';x.textContent='×';x.setAttribute('aria-label','Remove');
  x.onpointerdown=e=>e.stopPropagation();x.onclick=()=>remove(it);d.append(x);
+ const rt=document.createElement('button');rt.className='rot';rt.type='button';rt.textContent='↻';rt.setAttribute('aria-label','Rotate');
+ rt.onpointerdown=e=>{e.stopPropagation();e.preventDefault();rt.setPointerCapture(e.pointerId);
+  const rc=d.getBoundingClientRect(),mx=rc.left+rc.width/2,my=rc.top+rc.height/2;
+  const ang=ev=>Math.atan2(ev.clientY-my,ev.clientX-mx)*180/Math.PI;const a0=ang(e),r0=it.r||0;
+  const mv=ev=>{let n=r0+ang(ev)-a0;n=((n+540)%360)-180;if(Math.abs(n)<3)n=0;it.r=Math.round(n*10)/10;
+   const t='rotate('+it.r+'deg)';d.style.transform=t;d.style.setProperty('--t',t)};
+  const up=()=>{rt.removeEventListener('pointermove',mv);rt.removeEventListener('pointerup',up);patch(it,{r:it.r})};
+  rt.addEventListener('pointermove',mv);rt.addEventListener('pointerup',up)};
+ d.append(rt);
  drag(d,it);return d;
 }
 function drag(d,it){
@@ -385,7 +431,7 @@ $('#ren').onclick=async()=>{if(idx<1)return;const p=S.pages[idx-1];const n=promp
 $('#del').onclick=async()=>{if(idx<1)return;const p=S.pages[idx-1];
  if(!confirm('Remove the page “'+p.name+'” and everything on it?'))return;
  const paths=S.items.filter(i=>i.page===p.id).map(i=>i.img_path).filter(Boolean);
- await sb.from('pages').delete().eq('id',p.id);
+ await sb.from('pages').delete().eq('id',p.id);sb.from('settings').delete().eq('key','pstyle:'+p.id);
  S.pages=S.pages.filter(x=>x!==p);S.items=S.items.filter(i=>i.page!==p.id);
  if(paths.length)sb.storage.from('photos').remove(paths);
  idx=Math.min(idx,S.pages.length);show()};
@@ -415,8 +461,9 @@ fillPick($('#pkS'),STICKERS);fillPick($('#pkD'),DOODLES);
 $('#addSticker').onclick=()=>$('#pick').showModal();
 $('#pkX').onclick=()=>$('#pick').close();
 const JOKES=['Fabric curvature','Tit for tit','Nikal beautiful nikal','Originalitity (anything ending with ity)','Neend kaise aayein jab tum na ho paaas','5 arm distance','While standing','Cum','Remove','Pervy piya','Gayhan rulati','Caitlin','I love uturns','Rayhan’s guys – Madhav & Umesh','Riya’s girls – Naina & Sushmita','TISM – treasure I seriously marvel','Leave me with my thoughts','Gulu Gulu','BETTER','ABH AYI/AYA NA LINE PE'];
-JOKES.forEach(t=>{const b=document.createElement('button');b.className='pk txt';b.type='button';b.textContent=t;
- b.onclick=()=>{$('#pick').close();add({type:'phrase',text:t,blue:Math.random()<.4})};$('#pkJ').append(b)});
+JOKES.forEach((t,n)=>{const b=document.createElement('button'),bl=n%2===1,rr=[-2,1.5,-1,2.5][n%4];
+ b.className='pk txt'+(bl?' w':'');b.type='button';b.textContent=t;b.style.transform=`rotate(${rr}deg)`;
+ b.onclick=()=>{$('#pick').close();add({type:'phrase',text:t,blue:bl,r:rr})};$('#pkJ').append(b)});
 $('#pkL').onclick=()=>{$('#pick').close();add({type:'label',text:'write here'})};
 $('#pkT').onclick=()=>{$('#pick').close();add({type:'washi'})};
 $('#cvFrame').onclick=()=>{S.cover.frame=!S.cover.frame;saveSetting('cover_frame',S.cover.frame?'1':'0');refresh()};
@@ -452,6 +499,25 @@ async function applyTpl(t){
   (data||[]).forEach(r=>{if(!S.items.some(i=>i.id===r.id))S.items.push(r)})}
  go(S.pages.length);
 }
+
+// ---------- page style ----------
+function buildSty(){
+ const mk=(box,key,list)=>{list.forEach(([v,label,col])=>{const b=document.createElement('button');b.type='button';b.dataset.k=key;b.dataset.v=v;b.setAttribute('aria-label',label);
+  if(col){b.className='swc';b.style.background=col}else{b.className='tool small';b.textContent=label}
+  b.onclick=()=>setStyle({[key]:v});box.append(b)})};
+ mk($('#swBg'),'bg',[['navy','navy','#1B2A4A'],['midnight','midnight','#0E1830'],['ocean','ocean blue','#2D4F86'],['sky','pale blue','#DCE6F7'],['white','white','#FFFFFF']]);
+ mk($('#swPat'),'pat',[['grain','paper'],['plain','plain'],['dots','dots'],['grid','grid'],['lines','lined']]);
+ mk($('#swBd'),'bd',[['none','none'],['thin','thin'],['solid','solid'],['thick','thick'],['dashed','dashed'],['dotted','dotted'],['double','double'],['doodle','doodle']]);
+ mk($('#swBc'),'bc',[['auto','auto'],['pale','pale blue','#AFC3E6'],['white','white','#FFFFFF'],['navy','navy','#14213D'],['ocean','ocean blue','#2D4F86']]);
+}
+function updateSty(){const p=S.pages[idx-1];if(!p)return;const ps=pstyle(p.id);
+ document.querySelectorAll('#sty [data-k]').forEach(b=>b.setAttribute('aria-pressed',ps[b.dataset.k]===b.dataset.v))}
+function setStyle(o){const p=S.pages[idx-1];if(!p)return;const ns=Object.assign(pstyle(p.id),o);
+ S.styles[p.id]=ns;saveSetting('pstyle:'+p.id,JSON.stringify(ns));refresh();updateSty()}
+buildSty();
+$('#stylePage').onclick=()=>{if(idx<1)return;updateSty();$('#sty').showModal()};
+$('#styDone').onclick=()=>$('#sty').close();
+$('#styReset').onclick=()=>{const p=S.pages[idx-1];if(!p)return;delete S.styles[p.id];sb.from('settings').delete().eq('key','pstyle:'+p.id);refresh();updateSty()};
 </script>
 </body>
 </html>
