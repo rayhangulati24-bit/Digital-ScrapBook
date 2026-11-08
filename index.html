@@ -31,7 +31,7 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .sheet.pat-grid{background-image:linear-gradient(var(--pl) 1px,transparent 1px),linear-gradient(90deg,var(--pl) 1px,transparent 1px);background-size:28px 28px}
 .sheet.pat-lines{background-image:repeating-linear-gradient(transparent 0 31px,var(--pl) 31px 32px)}
 .pgb{position:absolute;inset:12px;width:calc(100% - 24px);height:calc(100% - 24px);fill:none;stroke:var(--bc);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
-.sheet.turning{transition:transform .95s cubic-bezier(.55,.1,.25,1);box-shadow:-18px 0 30px rgba(0,0,0,.45)}
+.sheet.turning{transition:transform 1.8s cubic-bezier(.45,.05,.25,1);box-shadow:-18px 0 30px rgba(0,0,0,.45)}
 .empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:'Caveat',cursive;font-size:30px;color:var(--pale);pointer-events:none;padding:24px}
 .item{position:absolute;touch-action:none;user-select:none;-webkit-user-select:none}
 .editing .item{cursor:grab}
@@ -231,7 +231,57 @@ Object.assign(ST,{
  scribble:'<path d="M35 10C15 10 8 30 14 46s30 18 42 4 6-34-10-38-34 4-30 26"/>'
 });
 const STICKERS=['star','heart','plane','moon','sun','cloud','flower','camera','envelope','coffee','key','crown','music','balloon','house','smile'];
-const DOODLES=['arrow','squiggle','underline','sparkle','dots','burst','bolt','hearts','scribble'];
+Object.assign(ST,{
+ arrow2:'<path d="M10 14C40 8 56 24 50 52M40 44l10 10 10-12"/>',
+ arrowloop:'<path d="M8 52C8 30 30 18 44 26S46 46 30 42 22 22 52 14M44 8l10 6-8 8"/>',
+ doublearrow:'<path d="M8 35h54M18 25L8 35l10 10M52 25l10 10-10 10"/>',
+ dashedarc:'<path d="M54 22l8 10-12 4"/><path d="M8 54C12 20 50 12 62 32" stroke-dasharray="1 8"/>',
+ zigzag:'<path d="M6 46l10-20 10 20 10-20 10 20 10-20 8 14"/>',
+ underline2:'<path d="M6 28C22 22 40 32 64 26M8 44C26 38 42 48 62 42"/>',
+ brackets:'<path d="M24 8c-10 0-10 8-10 14v26c0 6 0 14 10 14M46 8c10 0 10 8 10 14v26c0 6 0 14-10 14"/>',
+ spiral:'<path d="M36.5 35.0 L36.9 35.4 L37.1 36.0 L37.2 36.6 L37.1 37.4 L36.8 38.1 L36.2 38.8 L35.5 39.4 L34.5 39.8 L33.4 40.0 L32.2 39.9 L30.9 39.5 L29.7 38.8 L28.7 37.8 L27.8 36.5 L27.2 35.0 L27.0 33.3 L27.1 31.5 L27.7 29.7 L28.7 28.0 L30.1 26.4 L31.8 25.2 L33.9 24.3 L36.2 23.9 L38.6 24.0 L41.0 24.6 L43.3 25.8 L45.4 27.5 L47.1 29.6 L48.3 32.2 L49.1 35.0 L49.2 38.0 L48.6 41.1 L47.4 44.0 L45.5 46.7 L43.1 49.0 L40.1 50.8 L36.8 51.9 L33.2 52.3 L29.5 52.0 L25.9 50.8 L22.5 48.9 L19.6 46.2 L17.2 42.9 L15.5 39.1 L14.7 35.0 L14.7 30.7 L15.6 26.4 L17.5 22.3 L20.3 18.6 L23.8 15.6 L27.9 13.3 L32.6 11.8 L37.5 11.4 L42.5 12.1 L47.3 13.7 L51.7 16.5 L55.5 20.1 L58.6 24.5 L60.6 29.5 L61.6 35.0"/>',
+ waves:'<path d="M6 28c6-8 12-8 18 0s12 8 18 0 12-8 18 0M6 44c6-8 12-8 18 0s12 8 18 0 12-8 18 0"/>',
+ sparkles3:'<path d="M20 22c1 6 3 8 8 9-5 1-7 3-8 9-1-6-3-8-8-9 5-1 7-3 8-9zM48 14c.6 4 2 5 5 6-3 .6-4.4 2-5 6-.6-4-2-5.4-5-6 3-1 4.4-2 5-6zM46 48c1 5 3 7 8 8-5 1-7 3-8 8-1-5-3-7-8-8 5-1 7-3 8-8z"/>',
+ confetti:'<path d="M12 18l6 4M50 12l-2 8M58 34l8 2M14 44l8-3M36 58l2-8"/><path d="M30 14h.1M22 32h.1M46 42h.1M60 56h.1M40 28h.1" stroke-width="6"/>',
+ target:'<circle cx="35" cy="35" r="26"/><circle cx="35" cy="35" r="16" stroke-dasharray="1 7"/><circle cx="35" cy="35" r="3"/>',
+ diamond:'<path d="M16 24l8-12h22l8 12-19 32zM16 24h38M30 12l5 12 5-12M35 24v32"/>',
+ ribbon:'<path d="M35 35l-24-14v28zM35 35l24-14v28z"/><circle cx="35" cy="35" r="5"/>',
+ heartarrow:'<path d="M35 58C10 40 8 22 20 14c7-4 13 0 15 6 2-6 8-10 15-6 12 8 10 26-15 44z"/><path d="M6 62L64 8M54 8h10v10"/>',
+ brokenheart:'<path d="M35 58C10 40 8 22 20 14c7-4 11-1 15 6l-6 10 8 8-8 10"/><path d="M35 20c2-6 8-10 15-6 12 8 10 26-15 44"/>',
+ infinity:'<path d="M35 35c-8-14-26-14-26 0s18 14 26 0 26-14 26 0-18 14-26 0z"/>',
+ lips:'<path d="M8 36c8-10 16-10 27-4 11-6 19-6 27 4-10 14-44 14-54 0zM8 36c14 4 40 4 54 0"/>',
+ eye:'<path d="M6 35c12-18 46-18 58 0-12 18-46 18-58 0z"/><circle cx="35" cy="35" r="8"/>',
+ ldr:'<path d="M10 56C14 14 56 14 60 56" stroke-dasharray="1 9"/><circle cx="10" cy="58" r="3"/><circle cx="60" cy="58" r="3"/><path d="M35 24c-5-7-13 0-6 7l6 6 6-6c7-7-1-14-6-7z"/>',
+ leaf:'<path d="M10 56C10 24 30 10 58 12 60 40 44 58 10 56zM10 56L38 28"/>',
+ branch:'<path d="M10 62C24 46 34 30 44 8M26 48l-12-4M32 38l12-2M38 26l-10-6M42 18l8 2"/>',
+ tulip:'<path d="M35 36v28M35 36c-12-2-16-14-14-24l8 8 6-10 6 10 8-8c2 10-2 22-14 24zM35 54c-8 0-12-4-14-8M35 58c6 0 10-4 12-8"/>',
+ pine:'<path d="M35 64V46M35 8L17 30h10L14 48h42L43 30h10z"/>',
+ raindrop:'<path d="M35 8C24 24 16 32 16 42a19 19 0 0 0 38 0C54 32 46 24 35 8z"/>',
+ rain:'<path d="M20 34h30a10 10 0 0 0 1-20 14 14 0 0 0-26-4 12 12 0 0 0-5 24zM24 44l-3 8M36 44l-3 8M48 44l-3 8"/>',
+ snowflake:'<path d="M35 6v58M10 20l50 30M60 20L10 50M35 6l-6 6M35 6l6 6M35 64l-6-6M35 64l6-6"/>',
+ sunrise:'<path d="M8 50h54M16 50a19 19 0 0 1 38 0M35 14v8M14 24l6 6M56 24l-6 6"/>',
+ planet:'<circle cx="35" cy="35" r="14"/><ellipse cx="35" cy="35" rx="30" ry="9" transform="rotate(-25 35 35)"/>',
+ rocket:'<path d="M35 8c12 8 14 24 10 38H25C21 32 23 16 35 8zM25 46l-10 8 4-14M45 46l10 8-4-14M30 54c2 6 8 6 10 0"/><circle cx="35" cy="28" r="4"/>',
+ mountain:'<path d="M6 56l20-34 10 16 8-10 20 28z"/>',
+ speech:'<path d="M10 14h50v32H34l-12 12V46H10z"/>',
+ thought:'<ellipse cx="35" cy="26" rx="26" ry="16"/><circle cx="20" cy="52" r="4"/><circle cx="12" cy="62" r="2"/>',
+ exclaim:'<path d="M35 8v34M35 56h.1" stroke-width="6"/>',
+ question:'<path d="M22 22c0-18 26-18 26 0 0 12-13 12-13 26M35 60h.1" stroke-width="5"/>',
+ check:'<path d="M10 38l16 16L60 14"/>',
+ cross:'<path d="M14 14l42 42M56 14L14 56"/>',
+ plus:'<path d="M35 10v50M10 35h50"/>',
+ quote:'<path d="M10 30c0-12 8-16 14-16-4 4-6 8-6 14h8v14H10zM38 30c0-12 8-16 14-16-4 4-6 8-6 14h8v14H38z"/>',
+ flag:'<path d="M16 8v56M16 12h38l-8 12 8 12H16"/>',
+ cat:'<path d="M14 26l-2-16 14 8c6-2 12-2 18 0l14-8-2 16c4 6 4 12 0 18-6 10-32 10-38 0-4-6-4-12 0-18zM28 34v2M42 34v2M35 40v2M30 46c3 3 7 3 10 0"/>',
+ paw:'<path d="M35 34c-10 0-16 10-12 18 3 5 8 3 12 3s9 2 12-3c4-8-2-18-12-18z"/><ellipse cx="18" cy="30" rx="4" ry="6"/><ellipse cx="29" cy="18" rx="4" ry="7"/><ellipse cx="41" cy="18" rx="4" ry="7"/><ellipse cx="52" cy="30" rx="4" ry="6"/>'
+});
+const DOODLE_GROUPS={
+ 'arrows & lines':['arrow','arrow2','arrowloop','doublearrow','dashedarc','zigzag','squiggle','underline','underline2','dots','brackets','spiral','waves'],
+ 'sparkles & shapes':['sparkle','sparkles3','burst','bolt','confetti','target','diamond','ribbon','scribble'],
+ 'hearts & love':['hearts','heartarrow','brokenheart','infinity','lips','eye','ldr'],
+ 'nature & sky':['leaf','branch','tulip','pine','raindrop','rain','snowflake','sunrise','planet','rocket','mountain'],
+ 'marks & talk':['speech','thought','exclaim','question','check','cross','plus','quote','flag','cat','paw']
+};
 let slotTarget=null;
 const BGS={navy:'#1B2A4A',midnight:'#0E1830',ocean:'#2D4F86',sky:'#DCE6F7',white:'#FFFFFF'},LIGHT={sky:1,white:1};
 const BCS={pale:'#AFC3E6',white:'#FFFFFF',navy:'#14213D',ocean:'#2D4F86'};
@@ -400,10 +450,10 @@ function go(to){
  const raf2=f=>requestAnimationFrame(()=>requestAnimationFrame(f));
  if(dir>0){nw.style.zIndex=1;old.style.zIndex=2;st.append(nw);old.classList.add('turning');
   raf2(()=>old.style.transform='rotateY(-172deg)');
-  setTimeout(()=>{old.remove();busy=false},1000)}
+  setTimeout(()=>{old.remove();busy=false},1900)}
  else{nw.style.zIndex=3;old.style.zIndex=1;nw.style.transform='rotateY(-172deg)';nw.classList.add('turning');st.append(nw);
   raf2(()=>nw.style.transform='rotateY(0deg)');
-  setTimeout(()=>{old.remove();nw.classList.remove('turning');nw.style.transform='';busy=false},1000)}
+  setTimeout(()=>{old.remove();nw.classList.remove('turning');nw.style.transform='';busy=false},1900)}
 }
 $('#next').onclick=()=>go(idx+1);
 $('#prev').onclick=()=>go(idx-1);
@@ -417,7 +467,7 @@ function stopPlay(){clearInterval(playT);playT=null;$('#play').setAttribute('ari
 $('#play').onclick=()=>{if(playT){stopPlay();return}
  if(editing)return;
  $('#play').setAttribute('aria-pressed','true');$('#play').textContent='❚❚ pause';
- playT=setInterval(()=>go(idx>=total()-1?0:idx+1),5000)};
+ playT=setInterval(()=>go(idx>=total()-1?0:idx+1),7000)};
 
 // edit mode
 $('#edit').onclick=()=>{editing=!editing;stopPlay();
@@ -457,7 +507,8 @@ $('#drop').onclick=()=>{cv.toBlob(async b=>{const p=await upload(b,'png');if(p)a
 // ---------- stickers, doodles, page templates ----------
 function fillPick(box,keys){keys.forEach(k=>{const b=document.createElement('button');b.className='pk';b.type='button';b.setAttribute('aria-label',k);
  b.innerHTML=`<svg viewBox="0 0 70 70">${ST[k]}</svg>`;b.onclick=()=>{$('#pick').close();add({type:'sticker',k})};box.append(b)})}
-fillPick($('#pkS'),STICKERS);fillPick($('#pkD'),DOODLES);
+fillPick($('#pkS'),STICKERS);
+Object.entries(DOODLE_GROUPS).forEach(([g,keys])=>{const t=document.createElement('p');t.className='lbl';t.style.gridColumn='1/-1';t.textContent=g;$('#pkD').append(t);fillPick($('#pkD'),keys)});
 $('#addSticker').onclick=()=>$('#pick').showModal();
 $('#pkX').onclick=()=>$('#pick').close();
 const JOKES=['Fabric curvature','Tit for tit','Nikal beautiful nikal','Originalitity (anything ending with ity)','Neend kaise aayein jab tum na ho paaas','5 arm distance','While standing','Cum','Remove','Pervy piya','Gayhan rulati','Caitlin','I love uturns','Rayhan’s guys – Madhav & Umesh','Riya’s girls – Naina & Sushmita','TISM – treasure I seriously marvel','Leave me with my thoughts','Gulu Gulu','BETTER','ABH AYI/AYA NA LINE PE'];
