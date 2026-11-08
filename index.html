@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Our scrapbook</title>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Indie+Flower&family=Shadows+Into+Light&family=Kalam&family=Gaegu&family=Reenie+Beanie&family=Dancing+Script:wght@500;700&family=Permanent+Marker&family=Special+Elite&family=Nunito:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{--navy:#14213D;--navy2:#1B2A4A;--ink:#F6F3EC;--pale:#AFC3E6;--tape:rgba(246,243,236,.82);--tape1:rgba(246,243,236,.82);--tape2:rgba(175,195,230,.8)}
 *{box-sizing:border-box}
@@ -53,7 +53,7 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .rot{position:absolute;top:-10px;left:-10px;width:26px;height:26px;border-radius:50%;border:2px solid var(--navy);background:var(--pale);color:var(--navy);font:700 15px/1 sans-serif;cursor:grab;display:none;z-index:5;padding:0;touch-action:none}
 .editing .item:hover .x,.editing .item:focus-within .x,.editing .item:hover .rot,.editing .item:focus-within .rot,.editing .item:hover .shp,.editing .item:focus-within .shp{display:block}
 /* cover */
-.cover{--cp:#fff;--ci:#14213D;--tape1:rgba(20,33,61,.85);--tape2:rgba(175,195,230,.9);background:var(--cp);border-color:var(--ci);color:var(--ci);display:grid;place-items:center;text-align:center;padding:8%}
+.cover{--cp:#fff;--ci:#14213D;--tape1:rgba(20,33,61,.85);--tape2:rgba(175,195,230,.9);background-color:var(--cp);border-color:var(--ci);color:var(--ci);display:grid;place-items:center;text-align:center;padding:8%}
 .cover.c-blue{--cp:#DCE6F7}
 .cover.c-navy{--cp:#14213D;--ci:#F6F3EC;--tape1:rgba(246,243,236,.85);--tape2:rgba(175,195,230,.85)}
 .cover .sticker svg{stroke:var(--ci)}
@@ -96,7 +96,7 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .sw{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}
 .lbl{margin:6px 0 0;font-size:16px;color:var(--pale)}
 .swc{width:34px;height:34px;border-radius:50%;border:2px solid var(--ink);cursor:pointer;padding:0}
-#sty [aria-pressed=true]{outline:3px solid var(--pale);outline-offset:2px}
+#sty [aria-pressed=true],#tsty [aria-pressed=true]{outline:3px solid var(--pale);outline-offset:2px}
 #sty .tool.small[aria-pressed=true]{background:var(--ink);color:var(--navy)}
 /* note shapes */
 .note.s-sticky{width:180px;padding:18px 16px 28px}
@@ -149,6 +149,12 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .label textarea.f-bold{font-family:'Caveat',cursive;font-weight:700}
 .label textarea.f-print{font-family:'Patrick Hand','Comic Sans MS',cursive;font-weight:400}
 .label textarea.f-serif{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:400}
+#tsty{margin:auto auto 8px;max-height:64vh;overflow:auto;width:min(520px,94vw)}
+#tsty::backdrop{background:rgba(8,14,30,.12)}
+.fl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin:6px 0 12px}
+.fb{background:none;border:2px dashed var(--pale);border-radius:8px;color:var(--ink);font-size:23px;line-height:1.1;padding:5px 10px;text-align:left;cursor:pointer}
+.fb small{display:block;font:15px 'Patrick Hand',sans-serif;opacity:.7}
+#szRange{width:100%;accent-color:var(--pale);margin:6px 0 4px}
 /* controls */
 #ctrl{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:2px 12px 18px}
 #lbl{font-family:'Caveat',cursive;font-size:26px;min-width:150px;text-align:center}
@@ -193,11 +199,10 @@ canvas{background:var(--navy);border:2px dashed var(--pale);border-radius:8px;to
   <button class="tool itm" id="addSticker">+ stickers &amp; doodles</button>
   <button class="tool" id="addPage">+ page</button>
   <button class="tool pgonly" id="ren">rename page</button>
-  <button class="tool pgonly" id="stylePage" type="button">style page</button>
+  <button class="tool" id="stylePage" type="button">style page</button>
   <button class="tool pgonly" id="del">remove page</button>
-  <button class="tool cvonly" id="cvFrame" type="button"></button>
   <button class="tool cvonly" id="cvUl" type="button"></button>
-  <button class="tool cvonly" id="cvPaper" type="button"></button>
+
   <input type="file" id="file" accept="image/*" hidden>
  </div>
  <main id="stage" aria-live="polite"></main>
@@ -224,6 +229,13 @@ canvas{background:var(--navy);border:2px dashed var(--pale);border-radius:8px;to
 <dialog id="tpl">
  <h2 class="dlgh">start a new page</h2><div id="tplList"></div>
  <div class="row"><button class="tool" id="tplX">cancel</button></div>
+</dialog>
+<dialog id="tsty">
+ <h2 class="dlgh">text style</h2>
+ <p class="lbl">font</p><div class="fl" id="fontList"></div>
+ <p class="lbl">colour</p><div class="sw" id="colList"></div>
+ <p class="lbl">size</p><input type="range" id="szRange" step="5" aria-label="Text size">
+ <div class="row"><button class="tool" id="tstyDone" type="button">done</button></div>
 </dialog>
 <dialog id="sty">
  <h2 class="dlgh">style this page</h2>
@@ -403,7 +415,11 @@ let slotTarget=null;
 const BGS={navy:'#1B2A4A',midnight:'#0E1830',ocean:'#2D4F86',sky:'#DCE6F7',white:'#FFFFFF'},LIGHT={sky:1,white:1};
 const BCS={pale:'#AFC3E6',white:'#FFFFFF',navy:'#14213D',ocean:'#2D4F86'};
 const BORDERS={none:'0 none',thin:'1.5px solid',solid:'3px solid',thick:'7px solid',dashed:'3px dashed',dotted:'4px dotted',double:'6px double',doodle:'0 none'};
-const pstyle=id=>Object.assign({bg:'navy',pat:'grain',bd:'solid',bc:'auto'},S.styles[id]||{});
+const PGB='<svg class="pgb" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M1 2 C25 0 60 3 99 1 S100 40 98 99 C70 100 30 98 2 99 S0 60 1 2Z"/></svg>';
+const pstyle=id=>Object.assign(id==='cover'?{bg:{white:'white',blue:'sky',navy:'navy'}[S.cover.paper]||'white',pat:'plain',bd:S.cover.frame?'doodle':'none',bc:'auto'}:{bg:'navy',pat:'grain',bd:'solid',bc:'auto'},S.styles[id]||{});
+const FONTS=[['hand','Handwriting',"'Caveat',cursive",500,'normal'],['bold','Bold handwriting',"'Caveat',cursive",700,'normal'],['print','Print',"'Patrick Hand','Comic Sans MS',cursive",400,'normal'],['indie','Indie flower',"'Indie Flower',cursive",400,'normal'],['shadow','Shadows into light',"'Shadows Into Light',cursive",400,'normal'],['kalam','Kalam',"'Kalam',cursive",400,'normal'],['gaegu','Gaegu',"'Gaegu',cursive",400,'normal'],['reenie','Reenie Beanie',"'Reenie Beanie',cursive",400,'normal'],['dance','Dancing script',"'Dancing Script',cursive",700,'normal'],['marker','Marker',"'Permanent Marker',cursive",400,'normal'],['type','Typewriter',"'Special Elite',monospace",400,'normal'],['clean','Clean sans',"'Nunito',sans-serif",700,'normal'],['serif','Serif italic',"Georgia,'Times New Roman',serif",400,'italic']];
+const TCOL={auto:'',white:'#FFFFFF',cream:'#F6F3EC',pale:'#AFC3E6',sky:'#7FB0F0',ocean:'#4F78B8',royal:'#2D4F86',navy:'#14213D',midnight:'#0E1830',pink:'#F7C6D0',yellow:'#F6E3A1',mint:'#BFE3D0'};
+const sid=()=>idx===0?'cover':(S.pages[idx-1]||{}).id;
 
 // ---------- auth ----------
 $('#lf').onsubmit=async e=>{e.preventDefault();$('#msg').textContent='opening…';
@@ -474,27 +490,34 @@ async function upload(blob,ext){const path=`${me.id}/${uid()}.${ext}`;
 // ---------- sheets ----------
 function sheet(i){
  const d=document.createElement('div');
- if(i===0){d.className='sheet cover c-'+S.cover.paper;
-  d.innerHTML=(S.cover.frame?`<svg class="cb" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M1 2 C25 0 60 3 99 1 S100 40 98 99 C70 100 30 98 2 99 S0 60 1 2Z"/></svg>`:'')+
-  `<div class="ctb" data-b="t"><button class="mv" type="button" aria-label="Move title">✥</button><input id="ct" maxlength="40" aria-label="Cover title">`+
+ if(i===0){const ps=pstyle('cover'),light=!!LIGHT[ps.bg];
+  d.className='sheet cover pat-'+ps.pat+(light?' light':'');
+  d.style.backgroundColor=BGS[ps.bg]||'#fff';d.style.setProperty('--cp',BGS[ps.bg]||'#fff');d.style.setProperty('--ci',light?'#14213D':'#F6F3EC');
+  d.style.setProperty('--tape1',light?'rgba(20,33,61,.85)':'rgba(246,243,236,.85)');d.style.setProperty('--tape2','rgba(175,195,230,.9)');
+  const bcol=ps.bc==='auto'?(light?'#14213D':'#F6F3EC'):(BCS[ps.bc]||'#14213D');d.style.setProperty('--bc',bcol);
+  d.style.border=(BORDERS[ps.bd]||BORDERS.solid)+' '+bcol;
+  d.innerHTML=`<div class="ctb" data-b="t"><button class="mv" type="button" aria-label="Move title">✥</button><input id="ct" maxlength="40" aria-label="Cover title">`+
   (S.cover.ul?`<svg class="ul" viewBox="0 0 300 14" preserveAspectRatio="none"><path d="M2 8 C40 2 70 12 110 7 S190 3 230 8 S280 10 298 5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`:'')+
-  `<div class="sz"><button type="button" aria-label="Smaller">−</button><button type="button" aria-label="Bigger">+</button></div></div>`+
-  `<div class="ctb sub" data-b="s"><button class="mv" type="button" aria-label="Move subtitle">✥</button><input id="cs" maxlength="60" aria-label="Cover subtitle"><div class="sz"><button type="button" aria-label="Smaller">−</button><button type="button" aria-label="Bigger">+</button></div></div>`;
+  `<div class="sz"><button type="button" aria-label="Smaller">−</button><button type="button" aria-label="Bigger">+</button><button type="button" aria-label="Text style">Aa</button></div></div>`+
+  `<div class="ctb sub" data-b="s"><button class="mv" type="button" aria-label="Move subtitle">✥</button><input id="cs" maxlength="60" aria-label="Cover subtitle"><div class="sz"><button type="button" aria-label="Smaller">−</button><button type="button" aria-label="Bigger">+</button><button type="button" aria-label="Text style">Aa</button></div></div>`;
   const t=d.querySelector('#ct'),s=d.querySelector('#cs');
   t.value=S.cover.title;s.value=S.cover.sub;t.readOnly=s.readOnly=!editing;
   t.oninput=()=>{S.cover.title=t.value;saveSetting('cover_title',t.value)};
   s.oninput=()=>{S.cover.sub=s.value;saveSetting('cover_sub',s.value)};
-  d.querySelectorAll('.ctb').forEach(bx=>{const k=bx.dataset.b,pos=()=>S.cover.pos[k];
-   const apply=()=>{bx.style.left=pos().x*100+'%';bx.style.top=pos().y*100+'%';bx.style.setProperty('--sc',pos().s)};apply();
+  d.querySelectorAll('.ctb').forEach(bx=>{const k=bx.dataset.b,pos=()=>S.cover.pos[k],inp=bx.querySelector('input');
+   const apply=()=>{const q=pos();bx.style.left=q.x*100+'%';bx.style.top=q.y*100+'%';bx.style.setProperty('--sc',q.s);
+    const F=FONTS.find(x=>x[0]===q.f);inp.style.fontFamily=F?F[2]:'';inp.style.fontWeight=F?F[3]:'';inp.style.fontStyle=F?F[4]:'';inp.style.color=TCOL[q.c]||''};apply();
    const save=()=>saveSetting('cover_pos',JSON.stringify(S.cover.pos));
    const mv=bx.querySelector('.mv');
    mv.onpointerdown=e=>{e.preventDefault();mv.setPointerCapture(e.pointerId);const r=d.getBoundingClientRect(),x0=pos().x,y0=pos().y;
     const m=ev=>{pos().x=Math.min(.97,Math.max(.03,x0+(ev.clientX-e.clientX)/r.width));pos().y=Math.min(.97,Math.max(.03,y0+(ev.clientY-e.clientY)/r.height));apply()};
     const u=()=>{mv.removeEventListener('pointermove',m);mv.removeEventListener('pointerup',u);save()};mv.addEventListener('pointermove',m);mv.addEventListener('pointerup',u)};
-   const[mi,pl]=bx.querySelectorAll('.sz button');[mi,pl].forEach(x=>x.onpointerdown=ev=>ev.stopPropagation());
+   const[mi,pl,fb]=bx.querySelectorAll('.sz button');[mi,pl,fb].forEach(x=>x.onpointerdown=ev=>ev.stopPropagation());
    mi.onclick=()=>{pos().s=Math.max(.5,Math.round(pos().s*.85*100)/100);apply();save()};
-   pl.onclick=()=>{pos().s=Math.min(2.5,Math.round(pos().s*1.18*100)/100);apply();save()}});
+   pl.onclick=()=>{pos().s=Math.min(2.5,Math.round(pos().s*1.18*100)/100);apply();save()};
+   fb.onclick=()=>openTStyle({min:.5,max:2.5,get:()=>({f:pos().f||(k==='t'?'bold':'hand'),c:pos().c||'auto',s:pos().s}),set:o=>{Object.assign(pos(),o);apply();save()}})});
   S.items.filter(o=>!o.page).forEach(it=>d.append(el(it)));
+  if(ps.bd==='doodle')d.insertAdjacentHTML('afterbegin',PGB);
  }else{const p=S.pages[i-1],items=S.items.filter(o=>o.page===p.id),ps=pstyle(p.id),light=!!LIGHT[ps.bg];
   d.className='sheet pat-'+ps.pat+(light?' light':'');d.style.backgroundColor=BGS[ps.bg]||BGS.navy;
   const bcol=ps.bc==='auto'?(light?'#14213D':'#F6F3EC'):(BCS[ps.bc]||'#F6F3EC');d.style.setProperty('--bc',bcol);
@@ -522,17 +545,17 @@ function el(it){
   const fit=()=>{a.rows=Math.max(1,a.value.split('\n').reduce((n,l)=>n+Math.max(1,Math.ceil(l.length/12)),0))};fit();
   a.oninput=()=>{fit();patch(it,{text:a.value})}}
  else if(it.type==='label'){
-  d.innerHTML='<textarea aria-label="Text"></textarea><div class="sz"><button type="button" aria-label="Smaller text">−</button><button type="button" aria-label="Bigger text">+</button><button type="button" aria-label="Change font">Aa</button><button type="button" aria-label="Change colour">●</button></div>';
-  const a=d.querySelector('textarea'),FN=['hand','bold','print','serif'],CL={auto:'',pale:'#AFC3E6',white:'#FFFFFF',navy:'#14213D',ocean:'#4F78B8'},CK=Object.keys(CL);
-  const get=()=>{const q=(it.k||'hand:auto:1').split(':');return{f:FN.includes(q[0])?q[0]:'hand',c:CK.includes(q[1])?q[1]:'auto',s:Math.min(3,Math.max(.5,parseFloat(q[2])||1))}};
+  d.innerHTML='<textarea aria-label="Text"></textarea><div class="sz"><button type="button" aria-label="Smaller text">−</button><button type="button" aria-label="Bigger text">+</button><button type="button" aria-label="Text style">Aa</button></div>';
+  const a=d.querySelector('textarea');
+  const get=()=>{const q=(it.k||'hand:auto:1').split(':');return{f:FONTS.some(x=>x[0]===q[0])?q[0]:'hand',c:q[1] in TCOL?q[1]:'auto',s:Math.min(3,Math.max(.5,parseFloat(q[2])||1))}};
   const fit=()=>{a.rows=Math.max(1,a.value.split('\n').reduce((n,l)=>n+Math.max(1,Math.ceil(l.length/15)),0))};
-  const apply=()=>{const o=get();a.className='f-'+o.f;a.style.color=CL[o.c];a.style.fontSize=30*o.s+'px';d.style.width=200*o.s+'px';fit()};
+  const apply=()=>{const o=get(),F=FONTS.find(x=>x[0]===o.f)||FONTS[0];a.style.fontFamily=F[2];a.style.fontWeight=F[3];a.style.fontStyle=F[4];a.style.color=TCOL[o.c];a.style.fontSize=30*o.s+'px';d.style.width=200*o.s+'px';fit()};
   const set=o=>{const c=Object.assign(get(),o);patch(it,{k:c.f+':'+c.c+':'+c.s});apply()};
   a.value=it.text||'';a.readOnly=!editing;apply();
   a.oninput=()=>{fit();patch(it,{text:a.value})};
-  const[mi,pl,fb,cb]=d.querySelectorAll('.sz button');[mi,pl,fb,cb].forEach(x=>x.onpointerdown=e=>e.stopPropagation());
+  const[mi,pl,fb]=d.querySelectorAll('.sz button');[mi,pl,fb].forEach(x=>x.onpointerdown=e=>e.stopPropagation());
   mi.onclick=()=>set({s:Math.round(get().s*.85*100)/100});pl.onclick=()=>set({s:Math.round(get().s*1.18*100)/100});
-  fb.onclick=()=>set({f:FN[(FN.indexOf(get().f)+1)%FN.length]});cb.onclick=()=>set({c:CK[(CK.indexOf(get().c)+1)%CK.length]})}
+  fb.onclick=()=>openTStyle({min:.5,max:3,get,set})}
  else if(it.type==='washi'){const sc=Math.min(3,Math.max(.5,parseFloat(it.text)||1));
   d.innerHTML=`<div class="washi" style="width:${100*sc}px"></div><div class="sz"><button type="button" aria-label="Shorter">−</button><button type="button" aria-label="Longer">+</button></div>`;
   const[mi,pl]=d.querySelectorAll('.sz button'),wb=d.querySelector('.washi');
@@ -577,8 +600,8 @@ function label(){
  $('#prev').disabled=idx===0;$('#next').disabled=idx>=total()-1;
  document.querySelectorAll('.pgonly').forEach(b=>b.hidden=idx===0);
  document.querySelectorAll('.cvonly').forEach(b=>b.hidden=idx!==0);
- $('#cvFrame').textContent='frame: '+(S.cover.frame?'on':'off');$('#cvUl').textContent='underline: '+(S.cover.ul?'on':'off');
- $('#cvPaper').textContent='paper: '+({white:'white',blue:'pale blue',navy:'navy'}[S.cover.paper]||'white');
+ $('#cvUl').textContent='underline: '+(S.cover.ul?'on':'off');
+
 }
 function show(){const st=$('#stage');st.innerHTML='';st.append(sheet(idx));label()}
 function refresh(){const st=$('#stage');const old=st.querySelector('.sheet');if(!old||busy){show();return}
@@ -659,9 +682,7 @@ JOKES.forEach((t,n)=>{const b=document.createElement('button'),bl=n%2===1,rr=[-2
 $('#pkL').onclick=()=>{$('#pick').close();add({type:'label',text:'write here',k:'hand:auto:1'})};
 $('#addText').onclick=()=>add({type:'label',text:'write here',k:'hand:auto:1'});
 $('#pkT').onclick=()=>{$('#pick').close();add({type:'washi'})};
-$('#cvFrame').onclick=()=>{S.cover.frame=!S.cover.frame;saveSetting('cover_frame',S.cover.frame?'1':'0');refresh()};
 $('#cvUl').onclick=()=>{S.cover.ul=!S.cover.ul;saveSetting('cover_ul',S.cover.ul?'1':'0');refresh()};
-$('#cvPaper').onclick=()=>{const o=['white','blue','navy'];S.cover.paper=o[(o.indexOf(S.cover.paper)+1)%3];saveSetting('cover_paper',S.cover.paper);refresh()};
 $('#pkW').onclick=()=>{const t=prompt('Write your inside joke');if(t&&t.trim()){$('#pick').close();add({type:'phrase',text:t.trim(),blue:Math.random()<.4})}};
 
 const pol=(fx,fy,r)=>({type:'polaroid',fx,fy,r});
@@ -703,14 +724,14 @@ function buildSty(){
  mk($('#swBd'),'bd',[['none','none'],['thin','thin'],['solid','solid'],['thick','thick'],['dashed','dashed'],['dotted','dotted'],['double','double'],['doodle','doodle']]);
  mk($('#swBc'),'bc',[['auto','auto'],['pale','pale blue','#AFC3E6'],['white','white','#FFFFFF'],['navy','navy','#14213D'],['ocean','ocean blue','#2D4F86']]);
 }
-function updateSty(){const p=S.pages[idx-1];if(!p)return;const ps=pstyle(p.id);
+function updateSty(){const id=sid();if(!id)return;const ps=pstyle(id);
  document.querySelectorAll('#sty [data-k]').forEach(b=>b.setAttribute('aria-pressed',ps[b.dataset.k]===b.dataset.v))}
-function setStyle(o){const p=S.pages[idx-1];if(!p)return;const ns=Object.assign(pstyle(p.id),o);
- S.styles[p.id]=ns;saveSetting('pstyle:'+p.id,JSON.stringify(ns));refresh();updateSty()}
+function setStyle(o){const id=sid();if(!id)return;const ns=Object.assign(pstyle(id),o);
+ S.styles[id]=ns;saveSetting('pstyle:'+id,JSON.stringify(ns));refresh();updateSty()}
 buildSty();
-$('#stylePage').onclick=()=>{if(idx<1)return;updateSty();$('#sty').showModal()};
+$('#stylePage').onclick=()=>{updateSty();$('#sty').showModal()};
 $('#styDone').onclick=()=>$('#sty').close();
-$('#styReset').onclick=()=>{const p=S.pages[idx-1];if(!p)return;delete S.styles[p.id];sb.from('settings').delete().eq('key','pstyle:'+p.id);refresh();updateSty()};
+$('#styReset').onclick=()=>{const id=sid();if(!id)return;delete S.styles[id];sb.from('settings').delete().eq('key','pstyle:'+id);refresh();updateSty()};
 
 // ---------- note shapes ----------
 const NSHAPES=[['torn','torn paper'],['sticky','sticky note'],['card','index card'],['notebook','notebook page'],['ticket','ticket'],['ribbon','banner'],['tag','tag'],['round','round'],['heart','heart'],['cloud','cloud'],['star','star'],['speech','speech bubble']];
@@ -720,6 +741,24 @@ NSHAPES.forEach(([k,name],n)=>{const b=document.createElement('button');b.type='
  b.onclick=()=>{$('#nshape').close();add({type:'note',text:'',k,blue:Math.random()<.4})};$('#nGrid').append(b)});
 $('#addNote').onclick=()=>$('#nshape').showModal();
 $('#nX').onclick=()=>$('#nshape').close();
+
+// ---------- text style (font + colour lists) ----------
+let tTarget=null;
+(function(){
+ FONTS.forEach(f=>{const b=document.createElement('button');b.type='button';b.className='fb';b.dataset.tf=f[0];
+  b.style.fontFamily=f[2];b.style.fontWeight=f[3];b.style.fontStyle=f[4];b.innerHTML='Hello love<small>'+f[1]+'</small>';
+  b.onclick=()=>{if(tTarget){tTarget.set({f:f[0]});updT()}};$('#fontList').append(b)});
+ Object.entries(TCOL).forEach(([k,v])=>{const b=document.createElement('button');b.type='button';b.dataset.tc=k;b.setAttribute('aria-label',k);
+  if(v){b.className='swc';b.style.background=v}else{b.className='tool small';b.textContent='auto'}
+  b.onclick=()=>{if(tTarget){tTarget.set({c:k});updT()}};$('#colList').append(b)});
+ $('#szRange').oninput=e=>{if(tTarget)tTarget.set({s:e.target.value/100})};
+ $('#tstyDone').onclick=()=>$('#tsty').close();
+})();
+function updT(){if(!tTarget)return;const o=tTarget.get();
+ document.querySelectorAll('#tsty [data-tf]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tf===o.f));
+ document.querySelectorAll('#tsty [data-tc]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tc===o.c));
+ const r=$('#szRange');r.min=tTarget.min*100;r.max=tTarget.max*100;r.value=Math.round(o.s*100)}
+function openTStyle(t){tTarget=t;updT();$('#tsty').showModal()}
 </script>
 </body>
 </html>
