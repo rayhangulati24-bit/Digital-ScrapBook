@@ -7,7 +7,7 @@
 <title>Our scrapbook</title>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#14213D;--navy2:#1B2A4A;--ink:#F6F3EC;--pale:#AFC3E6;--tape:rgba(246,243,236,.82)}
+:root{--navy:#14213D;--navy2:#1B2A4A;--ink:#F6F3EC;--pale:#AFC3E6;--tape:rgba(246,243,236,.82);--tape1:rgba(246,243,236,.82);--tape2:rgba(175,195,230,.8)}
 *{box-sizing:border-box}
 html,body{overflow-x:hidden}
 body{margin:0;background:var(--navy);color:var(--ink);font-family:'Patrick Hand','Comic Sans MS',cursive;font-size:18px;min-height:100vh;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
@@ -37,23 +37,46 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .note textarea{width:100%;min-height:100px;border:0;background:none;resize:none;font-family:'Caveat',cursive;font-size:24px;line-height:1.1;color:var(--navy);padding:0}
 .note.blue{background:var(--pale)}
 .tape{position:absolute;top:-12px;left:50%;width:76px;height:24px;margin-left:-38px;transform:rotate(-4deg);pointer-events:none;
- background:repeating-linear-gradient(90deg,var(--tape) 0 8px,rgba(175,195,230,.8) 8px 14px)}
+ background:repeating-linear-gradient(90deg,var(--tape1) 0 8px,var(--tape2) 8px 14px)}
 .sticker svg{width:70px;height:70px;fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .sketch img{width:240px;display:block;pointer-events:none}
 .x{position:absolute;top:-10px;right:-10px;width:26px;height:26px;border-radius:50%;border:2px solid var(--navy);background:var(--ink);color:var(--navy);font:700 15px/1 sans-serif;cursor:pointer;display:none;z-index:5}
 .editing .item:hover .x,.editing .item:focus-within .x{display:block}
 /* cover */
-.cover{background:#fff;border-color:var(--navy);color:var(--navy);display:grid;place-items:center;text-align:center;padding:8%}
-.cover .cb{position:absolute;inset:14px;width:calc(100% - 28px);height:calc(100% - 28px);fill:none;stroke:var(--navy);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
-.cover .tape{background:repeating-linear-gradient(90deg,rgba(20,33,61,.85) 0 8px,rgba(175,195,230,.9) 8px 14px)}
-.cover .t1{left:14%;transform:rotate(-8deg)}.cover .t2{left:auto;right:6%;margin:0;transform:rotate(6deg)}
-.cover input{display:block;width:100%;border:0;background:none;text-align:center;font-family:'Caveat',cursive;color:var(--navy);padding:0;border-radius:6px}
+.cover{--cp:#fff;--ci:#14213D;--tape1:rgba(20,33,61,.85);--tape2:rgba(175,195,230,.9);background:var(--cp);border-color:var(--ci);color:var(--ci);display:grid;place-items:center;text-align:center;padding:8%}
+.cover.c-blue{--cp:#DCE6F7}
+.cover.c-navy{--cp:#14213D;--ci:#F6F3EC;--tape1:rgba(246,243,236,.85);--tape2:rgba(175,195,230,.85)}
+.cover .sticker svg{stroke:var(--ci)}
+.cover .label textarea{color:var(--ci)}
+.washi{height:26px;box-shadow:0 2px 4px rgba(0,0,0,.2);background:repeating-linear-gradient(90deg,var(--tape1) 0 8px,var(--tape2) 8px 14px)}
+.label{width:200px}
+.label textarea{font-size:30px;color:var(--ink)}
+.cover .cb{position:absolute;inset:14px;width:calc(100% - 28px);height:calc(100% - 28px);fill:none;stroke:var(--ci);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none}
+.cover input{display:block;width:100%;border:0;background:none;text-align:center;font-family:'Caveat',cursive;color:var(--ci);padding:0;border-radius:6px}
 #ct{font-size:clamp(50px,12vw,120px);font-weight:700;line-height:1}
 #cs{font-size:clamp(24px,4vw,36px);margin-top:10px}
 .editing .cover input{outline:2px dashed #8fa6d1;outline-offset:4px}
 .cover .ul{width:min(420px,70%);height:14px;margin:6px auto 0;display:block}
-.cs{position:absolute;pointer-events:none}.cs svg{width:76px;height:76px;fill:none;stroke:var(--navy);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-.cover .chint{position:absolute;bottom:34px;left:0;right:0;font-family:'Caveat',cursive;font-size:26px;color:#5d7099}
+.slot{display:grid;place-items:center;width:100%;aspect-ratio:1;border:2px dashed #8fa6d1;background:#e6e9f0;color:#5d7099;font-family:'Caveat',cursive;font-size:22px;line-height:1.1;cursor:default;padding:0}
+.editing .slot{cursor:pointer}
+.sz{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);display:none;gap:6px}
+.sz button{width:26px;height:26px;border-radius:50%;border:2px solid var(--navy);background:var(--ink);color:var(--navy);font:700 16px/1 sans-serif;cursor:pointer;padding:0}
+.editing .item:hover .sz,.editing .item:focus-within .sz{display:flex}
+@media (hover:none){.editing .x{display:block}.editing .sz{display:flex}}
+#pick{width:min(520px,94vw);max-height:86vh;overflow:auto}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:8px;margin:8px 0 14px}
+.pk{background:none;border:2px dashed var(--pale);border-radius:10px;padding:6px;cursor:pointer}
+.pk:hover{background:rgba(255,255,255,.08)}
+.pk svg{display:block;width:100%;height:auto;fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.dlgh{font-family:'Caveat',cursive;font-size:28px;margin:0}
+#tpl{width:min(420px,94vw)}
+#tpl .tl{display:block;width:100%;text-align:left;margin:8px 0}
+#tpl .tl small{display:block;opacity:.75;font-size:15px}
+.phrase{background:var(--pale);color:var(--navy);width:170px;padding:16px 12px 10px;border-radius:4px 14px 6px 12px;box-shadow:0 4px 10px rgba(0,0,0,.3);border:2px dashed var(--navy)}
+.phrase.blue{background:var(--ink)}
+.phrase textarea,.label textarea{display:block;width:100%;border:0;background:none;resize:none;overflow:hidden;font-family:'Caveat',cursive;font-weight:700;font-size:26px;line-height:1.05;color:var(--navy);text-align:center;padding:0}
+.pickT{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+.pk.txt{font-family:'Caveat',cursive;font-size:21px;line-height:1.05;color:var(--ink);padding:8px}
 /* controls */
 #ctrl{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:2px 12px 18px}
 #lbl{font-family:'Caveat',cursive;font-size:26px;min-width:150px;text-align:center}
@@ -93,11 +116,14 @@ canvas{background:var(--navy);border:2px dashed var(--pale);border-radius:8px;to
  <div class="tools" id="tools" hidden>
   <button class="tool itm" id="addNote">+ note</button>
   <button class="tool itm" id="addPhoto">+ photo</button>
-  <button class="tool itm" id="addDoodle">+ doodle</button>
-  <button class="tool itm" id="addSticker">+ sticker</button>
+  <button class="tool itm" id="addDoodle">+ draw</button>
+  <button class="tool itm" id="addSticker">+ stickers &amp; doodles</button>
   <button class="tool" id="addPage">+ page</button>
-  <button class="tool itm" id="ren">rename page</button>
-  <button class="tool itm" id="del">remove page</button>
+  <button class="tool pgonly" id="ren">rename page</button>
+  <button class="tool pgonly" id="del">remove page</button>
+  <button class="tool cvonly" id="cvFrame" type="button"></button>
+  <button class="tool cvonly" id="cvUl" type="button"></button>
+  <button class="tool cvonly" id="cvPaper" type="button"></button>
   <input type="file" id="file" accept="image/*" hidden>
  </div>
  <main id="stage" aria-live="polite"></main>
@@ -109,6 +135,17 @@ canvas{background:var(--navy);border:2px dashed var(--pale);border-radius:8px;to
  </div>
 </div>
 
+<dialog id="pick">
+ <h2 class="dlgh">our inside jokes</h2><div class="pick pickT" id="pkJ"></div>
+ <div class="row" style="margin:0 0 14px"><button class="tool" id="pkW" type="button">+ write your own</button> <button class="tool" id="pkL" type="button">+ plain text</button> <button class="tool" id="pkT" type="button">+ washi tape</button></div>
+ <h2 class="dlgh">stickers</h2><div class="pick" id="pkS"></div>
+ <h2 class="dlgh">doodles</h2><div class="pick" id="pkD"></div>
+ <div class="row"><button class="tool" id="pkX">close</button></div>
+</dialog>
+<dialog id="tpl">
+ <h2 class="dlgh">start a new page</h2><div id="tplList"></div>
+ <div class="row"><button class="tool" id="tplX">cancel</button></div>
+</dialog>
 <dialog id="dlg">
  <canvas id="cv" width="320" height="240"></canvas>
  <div class="row"><button class="tool" id="clr">clear</button><button class="tool" id="drop">stick it on the page</button><button class="tool" id="cancel">cancel</button></div>
@@ -128,7 +165,7 @@ else if(!C.url||!C.key||/YOUR-/.test(C.url+C.key))fail('config.js is missing or 
 else{try{sb=supabase.createClient(C.url,C.key)}catch(e){fail('Couldn’t connect to Supabase: '+e.message)}}
 if(!sb)throw new Error('Not connected');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let S={pages:[],items:[],cover:{title:'our scrapbook',sub:'for us, wherever we are'}},me=null,started=false;
+let S={pages:[],items:[],cover:{title:'our scrapbook',sub:'for us, wherever we are',frame:true,ul:true,paper:'white'}},me=null,started=false;
 let idx=0,editing=false,busy=false,playT=null;
 const urls={},pending={},timers={};
 const uid=()=>Math.random().toString(36).slice(2,10);
@@ -140,7 +177,32 @@ const ST={
  plane:'<path d="M8 36l54-24-14 46-14-14-10 10-2-16zM34 44l28-32"/>',
  moon:'<path d="M48 10C28 12 18 30 24 46c6 14 24 18 38 8C40 56 32 30 48 10z"/><path d="M56 16v8M52 20h8"/>'
 };
-const stKeys=Object.keys(ST);let stI=0;
+Object.assign(ST,{
+ sun:'<circle cx="35" cy="35" r="11"/><path d="M35 8v8M35 54v8M8 35h8M54 35h8M16 16l6 6M48 48l6 6M54 16l-6 6M22 48l-6 6"/>',
+ cloud:'<path d="M20 50h30a11 11 0 0 0 1-22 15 15 0 0 0-28-4 13 13 0 0 0-3 26z"/>',
+ flower:'<circle cx="35" cy="35" r="6"/><path d="M35 29c-8-8-6-18 0-18s8 10 0 18zM35 41c8 8 6 18 0 18s-8-10 0-18zM29 35c-8 8-18 6-18 0s10-8 18 0zM41 35c8-8 18-6 18 0s-10 8-18 0z"/>',
+ camera:'<path d="M10 24h12l4-6h18l4 6h12v32H10z"/><circle cx="35" cy="39" r="10"/>',
+ envelope:'<path d="M8 18h54v36H8zM8 18l27 22 27-22"/>',
+ coffee:'<path d="M12 28h34v16a14 14 0 0 1-14 14h-6a14 14 0 0 1-14-14zM46 32h6a7 7 0 0 1 0 14h-6M22 10c-3 4 3 6 0 10M32 10c-3 4 3 6 0 10"/>',
+ key:'<circle cx="20" cy="35" r="10"/><path d="M30 35h32M52 35v10M44 35v8"/>',
+ crown:'<path d="M10 52l-2-30 15 14 12-22 12 22 15-14-2 30z"/>',
+ music:'<path d="M26 52V16l30-6v36M26 52a8 6 0 1 1-8-6M56 46a8 6 0 1 1-8-6"/>',
+ balloon:'<path d="M35 8c-14 0-20 12-18 22 2 9 12 16 18 16s16-7 18-16C55 20 49 8 35 8zM35 46l-3 6h6zM35 52c-4 6 4 8 0 14"/>',
+ house:'<path d="M10 34L35 12l25 22M16 30v30h38V30M30 60V42h10v18"/>',
+ smile:'<circle cx="35" cy="35" r="26"/><path d="M26 28v4M44 28v4M24 42c6 10 16 10 22 0"/>',
+ arrow:'<path d="M8 50C20 20 40 20 58 22M48 12l11 10-12 8"/>',
+ squiggle:'<path d="M6 40c6-14 10-14 14 0s10 14 14 0 10-14 14 0 6 10 10 4"/>',
+ underline:'<path d="M6 40C20 32 30 46 44 38S58 36 64 38"/>',
+ sparkle:'<path d="M35 6c2 14 8 20 22 22-14 2-20 8-22 22-2-14-8-20-22-22 14-2 20-8 22-22z"/>',
+ dots:'<path d="M10 55h.1M22 48h.1M34 40h.1M46 32h.1M58 24h.1" stroke-width="7"/>',
+ burst:'<path d="M35 8v12M35 50v12M8 35h12M50 35h12M16 16l8 8M46 46l8 8M54 16l-8 8M24 46l-8 8"/>',
+ bolt:'<path d="M40 6L16 40h16l-6 24 28-38H38z"/>',
+ hearts:'<path d="M20 30c-8-6-10-14-4-16 3-1 4 1 4 3 0-2 1-4 4-3 6 2 4 10-4 16zM46 54c-8-6-10-14-4-16 3-1 4 1 4 3 0-2 1-4 4-3 6 2 4 10-4 16z"/>',
+ scribble:'<path d="M35 10C15 10 8 30 14 46s30 18 42 4 6-34-10-38-34 4-30 26"/>'
+});
+const STICKERS=['star','heart','plane','moon','sun','cloud','flower','camera','envelope','coffee','key','crown','music','balloon','house','smile'];
+const DOODLES=['arrow','squiggle','underline','sparkle','dots','burst','bolt','hearts','scribble'];
+let slotTarget=null;
 
 // ---------- auth ----------
 $('#lf').onsubmit=async e=>{e.preventDefault();$('#msg').textContent='opening…';
@@ -156,7 +218,7 @@ sb.auth.onAuthStateChange((_e,session)=>{
 sb.auth.getSession().then(({data})=>{if(!data.session)$('#login').hidden=false});
 
 // ---------- load + live sync ----------
-function readSettings(rows){(rows||[]).forEach(r=>{if(r.key==='cover_title')S.cover.title=r.value;if(r.key==='cover_sub')S.cover.sub=r.value})}
+function readSettings(rows){(rows||[]).forEach(r=>{if(r.key==='cover_title')S.cover.title=r.value;if(r.key==='cover_sub')S.cover.sub=r.value;if(r.key==='cover_frame')S.cover.frame=r.value!=='0';if(r.key==='cover_ul')S.cover.ul=r.value!=='0';if(r.key==='cover_paper')S.cover.paper=r.value})}
 async function start(){
  let p=await sb.from('pages').select().order('position');
  if(!p.data||!p.data.length){
@@ -165,6 +227,7 @@ async function start(){
  }
  const[i,s]=await Promise.all([sb.from('items').select(),sb.from('settings').select()]);
  S.pages=p.data||[];S.items=i.data||[];readSettings(s.data);
+ if(!(s.data||[]).some(r=>r.key==='cover_seeded'))await seedCover();
  show();
  sb.channel('scrap')
   .on('postgres_changes',{event:'*',schema:'public',table:'items'},pl=>{
@@ -176,6 +239,15 @@ async function start(){
   .on('postgres_changes',{event:'*',schema:'public',table:'settings'},pl=>{if(pl.new)readSettings([pl.new]);soft()})
   .subscribe();
 }
+async function seedCover(){
+ await sb.from('settings').upsert({key:'cover_seeded',value:'1'});
+ const b=$('#stage').getBoundingClientRect(),w=b.width||360,hh=b.height||600;let z=Math.max(0,...S.items.map(i=>i.z||0));
+ const st=(k,fx,fy,r)=>({page:null,type:'sticker',k,r,z:++z,x:Math.round(fx*(w-90)),y:Math.round(fy*(hh-100))});
+ const rows=[st('star',.02,.04,-12),st('plane',.98,.05,10),st('moon',.02,.8,8),st('heart',.98,.78,-8),
+  {page:null,type:'washi',r:-8,z:++z,x:Math.round(w*.12),y:10},{page:null,type:'washi',r:6,z:++z,x:Math.round(w*.72),y:14},
+  {page:null,type:'label',text:'open it up →',r:0,z:++z,x:Math.round(w/2-100),y:hh-80}];
+ const{data}=await sb.from('items').insert(rows).select();(data||[]).forEach(r=>S.items.push(r));
+}
 function soft(){const a=document.activeElement;if(busy||(a&&a.closest&&a.closest('#stage')&&a.matches('input,textarea')))return;refresh()}
 
 // ---------- saving ----------
@@ -184,7 +256,7 @@ function patch(it,f){Object.assign(it,f);pending[it.id]=Object.assign(pending[it
   await sb.from('items').update(d).eq('id',it.id)},500)}
 function saveSetting(key,value){clearTimeout(timers[key]);timers[key]=setTimeout(()=>sb.from('settings').upsert({key,value}),600)}
 async function add(o){const b=$('#stage').getBoundingClientRect();
- const row=Object.assign({page:S.pages[idx-1].id,x:30+Math.random()*Math.max(40,b.width-280),y:30+Math.random()*Math.max(40,b.height-300),r:rot(),z:Math.max(0,...S.items.map(i=>i.z||0))+1},o);
+ const row=Object.assign({page:idx?S.pages[idx-1].id:null,x:30+Math.random()*Math.max(40,b.width-280),y:30+Math.random()*Math.max(40,b.height-300),r:rot(),z:Math.max(0,...S.items.map(i=>i.z||0))+1},o);
  const{data,error}=await sb.from('items').insert(row).select().single();
  if(error){alert('Couldn’t save that: '+error.message);return}
  if(!S.items.some(i=>i.id===data.id))S.items.push(data);refresh()}
@@ -201,19 +273,16 @@ async function upload(blob,ext){const path=`${me.id}/${uid()}.${ext}`;
 // ---------- sheets ----------
 function sheet(i){
  const d=document.createElement('div');
- if(i===0){d.className='sheet cover';
-  d.innerHTML=`<svg class="cb" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M1 2 C25 0 60 3 99 1 S100 40 98 99 C70 100 30 98 2 99 S0 60 1 2Z"/></svg>
-  <i class="tape t1"></i><i class="tape t2"></i>
-  <div style="width:100%"><input id="ct" maxlength="40" aria-label="Cover title"><svg class="ul" viewBox="0 0 300 14" preserveAspectRatio="none"><path d="M2 8 C40 2 70 12 110 7 S190 3 230 8 S280 10 298 5" fill="none" stroke="#14213D" stroke-width="3" stroke-linecap="round"/></svg><input id="cs" maxlength="60" aria-label="Cover subtitle"></div>
-  <div class="cs" style="top:9%;left:8%;transform:rotate(-12deg)"><svg viewBox="0 0 70 70">${ST.star}</svg></div>
-  <div class="cs" style="top:12%;right:9%;transform:rotate(10deg)"><svg viewBox="0 0 70 70">${ST.plane}</svg></div>
-  <div class="cs" style="bottom:14%;left:10%;transform:rotate(8deg)"><svg viewBox="0 0 70 70">${ST.moon}</svg></div>
-  <div class="cs" style="bottom:13%;right:11%;transform:rotate(-8deg)"><svg viewBox="0 0 70 70">${ST.heart}</svg></div>
-  <p class="chint">open it up →</p>`;
+ if(i===0){d.className='sheet cover c-'+S.cover.paper;
+  d.innerHTML=(S.cover.frame?`<svg class="cb" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M1 2 C25 0 60 3 99 1 S100 40 98 99 C70 100 30 98 2 99 S0 60 1 2Z"/></svg>`:'')+
+  `<div style="width:100%"><input id="ct" maxlength="40" aria-label="Cover title">`+
+  (S.cover.ul?`<svg class="ul" viewBox="0 0 300 14" preserveAspectRatio="none"><path d="M2 8 C40 2 70 12 110 7 S190 3 230 8 S280 10 298 5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`:'')+
+  `<input id="cs" maxlength="60" aria-label="Cover subtitle"></div>`;
   const t=d.querySelector('#ct'),s=d.querySelector('#cs');
   t.value=S.cover.title;s.value=S.cover.sub;t.readOnly=s.readOnly=!editing;
   t.oninput=()=>{S.cover.title=t.value;saveSetting('cover_title',t.value)};
   s.oninput=()=>{S.cover.sub=s.value;saveSetting('cover_sub',s.value)};
+  S.items.filter(o=>!o.page).forEach(it=>d.append(el(it)));
  }else{d.className='sheet';
   const p=S.pages[i-1],items=S.items.filter(o=>o.page===p.id);
   if(!items.length)d.innerHTML=`<div class="empty">${editing?'a blank page.<br>add a note, a photo or a doodle above.':'(nothing here yet)'}</div>`;
@@ -224,12 +293,27 @@ function sheet(i){
 function el(it){
  const d=document.createElement('div');d.className='item '+it.type;
  const t=`rotate(${it.r}deg)`;d.style.cssText=`left:${it.x}px;top:${it.y}px;z-index:${(it.z||0)+1};transform:${t};--t:${t}`;
- if(it.type==='polaroid'){d.className+=' polaroid';d.innerHTML='<i class="tape"></i><img alt=""><input maxlength="40" aria-label="Caption">';
-  sign(it.img_path).then(u=>{if(u)d.querySelector('img').src=u});
+ if(it.type==='polaroid'){d.className+=' polaroid';d.innerHTML='<i class="tape"></i>'+(it.img_path?'<img alt="">':'<button class="slot" type="button">'+(editing?'tap to add<br>a photo':'')+'</button>')+'<input maxlength="40" aria-label="Caption">';
+  if(it.img_path)sign(it.img_path).then(u=>{if(u)d.querySelector('img').src=u});
+  else d.querySelector('.slot').onclick=()=>{if(!editing)return;slotTarget=it;$('#file').click()};
   const i=d.querySelector('input');i.value=it.text||'';i.readOnly=!editing;if(editing)i.placeholder='caption';if(!editing&&!it.text)i.style.display='none';i.oninput=()=>patch(it,{text:i.value})}
  else if(it.type==='note'){d.className+=' note'+(it.blue?' blue':'');d.innerHTML='<i class="tape"></i><textarea aria-label="Note"></textarea>';
   const a=d.querySelector('textarea');a.value=it.text||'';a.readOnly=!editing;if(editing)a.placeholder='write something…';a.oninput=()=>patch(it,{text:a.value})}
- else if(it.type==='sticker')d.innerHTML=`<svg viewBox="0 0 70 70">${ST[it.k]||ST.star}</svg>`;
+ else if(it.type==='phrase'||it.type==='label'){const ph=it.type==='phrase';d.className+=(ph&&it.blue?' blue':'');
+  d.innerHTML=(ph?'<i class="tape"></i>':'')+'<textarea aria-label="Text"></textarea>';
+  const a=d.querySelector('textarea');a.value=it.text||'';a.readOnly=!editing;
+  const fit=()=>{a.rows=Math.max(1,a.value.split('\n').reduce((n,l)=>n+Math.max(1,Math.ceil(l.length/(ph?12:15))),0))};fit();
+  a.oninput=()=>{fit();patch(it,{text:a.value})}}
+ else if(it.type==='washi'){const sc=Math.min(3,Math.max(.5,parseFloat(it.text)||1));
+  d.innerHTML=`<div class="washi" style="width:${100*sc}px"></div><div class="sz"><button type="button" aria-label="Shorter">−</button><button type="button" aria-label="Longer">+</button></div>`;
+  const[mi,pl]=d.querySelectorAll('.sz button'),wb=d.querySelector('.washi');
+  const rs=f=>{const n=Math.min(3,Math.max(.5,(parseFloat(it.text)||1)*f));patch(it,{text:String(Math.round(n*100)/100)});wb.style.width=100*n+'px'};
+  [mi,pl].forEach(b=>b.onpointerdown=e=>e.stopPropagation());mi.onclick=()=>rs(.8);pl.onclick=()=>rs(1.25)}
+ else if(it.type==='sticker'){const sc=Math.min(3,Math.max(.5,parseFloat(it.text)||1));
+  d.innerHTML=`<svg viewBox="0 0 70 70" style="width:${70*sc}px;height:${70*sc}px">${ST[it.k]||ST.star}</svg><div class="sz"><button type="button" aria-label="Smaller">−</button><button type="button" aria-label="Bigger">+</button></div>`;
+  const[mi,pl]=d.querySelectorAll('.sz button'),sv=d.querySelector('svg');
+  const rs=f=>{const n=Math.min(3,Math.max(.5,(parseFloat(it.text)||1)*f));patch(it,{text:String(Math.round(n*100)/100)});sv.style.width=sv.style.height=70*n+'px'};
+  [mi,pl].forEach(b=>b.onpointerdown=e=>e.stopPropagation());mi.onclick=()=>rs(.8);pl.onclick=()=>rs(1.25)}
  else if(it.type==='sketch'){d.innerHTML='<img alt="A doodle">';sign(it.img_path).then(u=>{if(u)d.querySelector('img').src=u})}
  const x=document.createElement('button');x.className='x';x.textContent='×';x.setAttribute('aria-label','Remove');
  x.onpointerdown=e=>e.stopPropagation();x.onclick=()=>remove(it);d.append(x);
@@ -253,7 +337,10 @@ function drag(d,it){
 function label(){
  $('#lbl').textContent=idx===0?'cover':`${S.pages[idx-1]?S.pages[idx-1].name:''}  ·  ${idx} / ${S.pages.length}`;
  $('#prev').disabled=idx===0;$('#next').disabled=idx>=total()-1;
- document.querySelectorAll('.itm').forEach(b=>b.hidden=idx===0);
+ document.querySelectorAll('.pgonly').forEach(b=>b.hidden=idx===0);
+ document.querySelectorAll('.cvonly').forEach(b=>b.hidden=idx!==0);
+ $('#cvFrame').textContent='frame: '+(S.cover.frame?'on':'off');$('#cvUl').textContent='underline: '+(S.cover.ul?'on':'off');
+ $('#cvPaper').textContent='paper: '+({white:'white',blue:'pale blue',navy:'navy'}[S.cover.paper]||'white');
 }
 function show(){const st=$('#stage');st.innerHTML='';st.append(sheet(idx));label()}
 function refresh(){const st=$('#stage');const old=st.querySelector('.sheet');if(!old||busy){show();return}
@@ -293,10 +380,6 @@ $('#edit').onclick=()=>{editing=!editing;stopPlay();
 
 // ---------- toolbar ----------
 $('#addNote').onclick=()=>add({type:'note',text:'',blue:Math.random()<.4});
-$('#addSticker').onclick=()=>add({type:'sticker',k:stKeys[stI++%stKeys.length]});
-$('#addPage').onclick=async()=>{const n=prompt('Name the new page');if(!n||!n.trim())return;
- const{data}=await sb.from('pages').insert({name:n.trim(),position:S.pages.length}).select().single();
- if(data){if(!S.pages.some(p=>p.id===data.id))S.pages.push(data);go(S.pages.length)}};
 $('#ren').onclick=async()=>{if(idx<1)return;const p=S.pages[idx-1];const n=prompt('Rename page',p.name);
  if(n&&n.trim()){p.name=n.trim();label();await sb.from('pages').update({name:p.name}).eq('id',p.id)}};
 $('#del').onclick=async()=>{if(idx<1)return;const p=S.pages[idx-1];
@@ -306,11 +389,11 @@ $('#del').onclick=async()=>{if(idx<1)return;const p=S.pages[idx-1];
  S.pages=S.pages.filter(x=>x!==p);S.items=S.items.filter(i=>i.page!==p.id);
  if(paths.length)sb.storage.from('photos').remove(paths);
  idx=Math.min(idx,S.pages.length);show()};
-$('#addPhoto').onclick=()=>$('#file').click();
-$('#file').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+$('#addPhoto').onclick=()=>{slotTarget=null;$('#file').click()};
+$('#file').onchange=e=>{const f=e.target.files[0];e.target.value='';const slot=slotTarget;slotTarget=null;if(!f)return;
  const im=new Image();im.onload=()=>{const k=Math.min(1,900/Math.max(im.width,im.height));const c=document.createElement('canvas');
   c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(im.src);
-  c.toBlob(async b=>{const p=await upload(b,'jpg');if(p)add({type:'polaroid',img_path:p,text:''})},'image/jpeg',.82)};
+  c.toBlob(async b=>{const p=await upload(b,'jpg');if(p){if(slot){patch(slot,{img_path:p});refresh()}else add({type:'polaroid',img_path:p,text:''})}},'image/jpeg',.82)};
  im.src=URL.createObjectURL(f)};
 
 // doodle pad
@@ -324,6 +407,51 @@ $('#addDoodle').onclick=()=>{cx.clearRect(0,0,cv.width,cv.height);$('#dlg').show
 $('#clr').onclick=()=>cx.clearRect(0,0,cv.width,cv.height);
 $('#cancel').onclick=()=>$('#dlg').close();
 $('#drop').onclick=()=>{cv.toBlob(async b=>{const p=await upload(b,'png');if(p)add({type:'sketch',img_path:p});$('#dlg').close()},'image/png')};
+
+// ---------- stickers, doodles, page templates ----------
+function fillPick(box,keys){keys.forEach(k=>{const b=document.createElement('button');b.className='pk';b.type='button';b.setAttribute('aria-label',k);
+ b.innerHTML=`<svg viewBox="0 0 70 70">${ST[k]}</svg>`;b.onclick=()=>{$('#pick').close();add({type:'sticker',k})};box.append(b)})}
+fillPick($('#pkS'),STICKERS);fillPick($('#pkD'),DOODLES);
+$('#addSticker').onclick=()=>$('#pick').showModal();
+$('#pkX').onclick=()=>$('#pick').close();
+const JOKES=['Fabric curvature','Tit for tit','Nikal beautiful nikal','Originalitity (anything ending with ity)','Neend kaise aayein jab tum na ho paaas','5 arm distance','While standing','Cum','Remove','Pervy piya','Gayhan rulati','Caitlin','I love uturns','Rayhan’s guys – Madhav & Umesh','Riya’s girls – Naina & Sushmita','TISM – treasure I seriously marvel','Leave me with my thoughts','Gulu Gulu','BETTER','ABH AYI/AYA NA LINE PE'];
+JOKES.forEach(t=>{const b=document.createElement('button');b.className='pk txt';b.type='button';b.textContent=t;
+ b.onclick=()=>{$('#pick').close();add({type:'phrase',text:t,blue:Math.random()<.4})};$('#pkJ').append(b)});
+$('#pkL').onclick=()=>{$('#pick').close();add({type:'label',text:'write here'})};
+$('#pkT').onclick=()=>{$('#pick').close();add({type:'washi'})};
+$('#cvFrame').onclick=()=>{S.cover.frame=!S.cover.frame;saveSetting('cover_frame',S.cover.frame?'1':'0');refresh()};
+$('#cvUl').onclick=()=>{S.cover.ul=!S.cover.ul;saveSetting('cover_ul',S.cover.ul?'1':'0');refresh()};
+$('#cvPaper').onclick=()=>{const o=['white','blue','navy'];S.cover.paper=o[(o.indexOf(S.cover.paper)+1)%3];saveSetting('cover_paper',S.cover.paper);refresh()};
+$('#pkW').onclick=()=>{const t=prompt('Write your inside joke');if(t&&t.trim()){$('#pick').close();add({type:'phrase',text:t.trim(),blue:Math.random()<.4})}};
+
+const pol=(fx,fy,r)=>({type:'polaroid',fx,fy,r});
+const nt=(fx,fy,r,text,blue)=>({type:'note',fx,fy,r,text,blue});
+const sk=(fx,fy,r,k)=>({type:'sticker',fx,fy,r,k});
+const TPL=[
+ {name:'blank page',hint:'start from nothing',items:[]},
+ {name:'photo wall',hint:'four empty polaroids to fill',items:[pol(.04,.04,-3),pol(.96,.0,2.5),pol(.08,.96,2),pol(.92,.9,-2.5),sk(.5,.5,8,'star'),sk(.5,.1,-6,'sparkle')]},
+ {name:'love letter',hint:'a note to write, with hearts',items:[nt(.35,.08,-1.5,'dear you,\n\n\n\nyours always',true),sk(.08,.15,-8,'heart'),sk(.92,.55,10,'envelope'),sk(.85,.08,6,'sparkle'),sk(.12,.85,-6,'plane')]},
+ {name:'date night',hint:'photo, plus where, what and best moment',items:[pol(.06,.06,-3),nt(.6,.04,2,'where we went:\n'),nt(.1,.9,-2,'what we ate:\n'),nt(.62,.82,2.5,'favourite moment:\n',true),sk(.45,.5,0,'star'),sk(.95,.45,8,'coffee')]},
+ {name:'reasons I love you',hint:'two notes to fill with reasons',items:[nt(.1,.1,-2,'reasons I love you\n1. \n2. \n3. ',true),nt(.6,.2,2,'more reasons\n4. \n5. \n6. '),sk(.45,.8,-6,'heart'),sk(.9,.8,8,'hearts'),sk(.05,.8,4,'sparkle')]},
+ {name:'bucket list',hint:'things to do together',items:[nt(.12,.1,-1.5,'our bucket list\n☐ \n☐ \n☐ \n☐ '),nt(.62,.12,2,'places to go\n',true),sk(.5,.75,-8,'plane'),sk(.88,.75,6,'moon'),sk(.1,.85,4,'camera')]}
+];
+TPL.forEach(t=>{const b=document.createElement('button');b.className='tool tl';b.type='button';
+ b.innerHTML=`${t.name}<small>${t.hint}</small>`;b.onclick=()=>{$('#tpl').close();applyTpl(t)};$('#tplList').append(b)});
+$('#addPage').onclick=()=>$('#tpl').showModal();
+$('#tplX').onclick=()=>$('#tpl').close();
+async function applyTpl(t){
+ const n=prompt('Name the new page',t.name);if(!n||!n.trim())return;
+ const{data:pg,error}=await sb.from('pages').insert({name:n.trim(),position:S.pages.length}).select().single();
+ if(error||!pg){alert('Couldn’t add the page.');return}
+ if(!S.pages.some(p=>p.id===pg.id))S.pages.push(pg);
+ const b=$('#stage').getBoundingClientRect();let z=Math.max(0,...S.items.map(i=>i.z||0));
+ const rows=t.items.map(s=>({page:pg.id,type:s.type,k:s.k||null,text:s.text||null,blue:!!s.blue,r:s.r||0,z:++z,
+  x:Math.round(s.fx*Math.max(0,b.width-230)+10),y:Math.round(s.fy*Math.max(0,b.height-270)+10)}));
+ if(rows.length){const{data,error:e2}=await sb.from('items').insert(rows).select();
+  if(e2)alert('Couldn’t add the template pieces: '+e2.message);
+  (data||[]).forEach(r=>{if(!S.items.some(i=>i.id===r.id))S.items.push(r)})}
+ go(S.pages.length);
+}
 </script>
 </body>
 </html>
