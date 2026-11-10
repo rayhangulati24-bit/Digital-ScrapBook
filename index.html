@@ -38,9 +38,9 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .item.drag{cursor:grabbing;z-index:99999!important;filter:drop-shadow(0 10px 8px rgba(0,0,0,.35))}
 .item.stuck{animation:stick .25s}
 @keyframes stick{50%{transform:var(--t) scale(1.05)}}
-.polaroid{background:var(--ink);padding:10px 10px 8px;width:200px;box-shadow:0 4px 10px rgba(0,0,0,.35);color:var(--navy)}
+.polaroid{--fc:var(--ink);--fi:var(--navy);--bw:200px;background:var(--fc);padding:10px 10px 8px;width:calc(var(--bw)*var(--ps,1));box-shadow:0 4px 10px rgba(0,0,0,.35);color:var(--fi)}
 .polaroid img{display:block;width:100%;aspect-ratio:1;object-fit:cover;pointer-events:none;background:#ddd}
-.polaroid input{width:100%;border:0;background:none;font-family:'Caveat',cursive;font-size:22px;text-align:center;color:var(--navy);margin-top:4px;padding:0}
+.polaroid input{width:100%;border:0;background:none;font-family:'Caveat',cursive;font-size:22px;text-align:center;color:var(--fi);margin-top:4px;padding:0}
 .note{--np:var(--ink);color:var(--navy);width:190px;padding:20px 14px 14px;filter:drop-shadow(0 4px 5px rgba(0,0,0,.32))}
 .note::before{content:"";position:absolute;inset:0;z-index:-1;background-color:var(--np);clip-path:polygon(0 3%,6% 0,14% 2%,25% 0,38% 3%,50% 0,63% 2%,77% 0,90% 3%,100% 0,100% 100%,0 100%)}
 .note textarea{width:100%;min-height:100px;border:0;background:none;resize:none;font-family:'Caveat',cursive;font-size:24px;line-height:1.1;color:var(--navy);padding:0}
@@ -96,7 +96,7 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .sw{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}
 .lbl{margin:6px 0 0;font-size:16px;color:var(--pale)}
 .swc{width:34px;height:34px;border-radius:50%;border:2px solid var(--ink);cursor:pointer;padding:0}
-#sty [aria-pressed=true],#tsty [aria-pressed=true]{outline:3px solid var(--pale);outline-offset:2px}
+#sty [aria-pressed=true],#tsty [aria-pressed=true],#psty [aria-pressed=true]{outline:3px solid var(--pale);outline-offset:2px}
 #sty .tool.small[aria-pressed=true]{background:var(--ink);color:var(--navy)}
 /* note shapes */
 .note.s-sticky{width:180px;padding:18px 16px 28px}
@@ -155,6 +155,27 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .fb{background:none;border:2px dashed var(--pale);border-radius:8px;color:var(--ink);font-size:23px;line-height:1.1;padding:5px 10px;text-align:left;cursor:pointer}
 .fb small{display:block;font:15px 'Patrick Hand',sans-serif;opacity:.7}
 #szRange{width:100%;accent-color:var(--pale);margin:6px 0 4px}
+/* photo designs */
+.pd-wide{--bw:260px}.pd-wide img,.pd-wide .slot{aspect-ratio:4/3}
+.pd-mini{--bw:130px;padding:7px 7px 6px}.pd-mini input{font-size:16px}
+.pd-thin{padding:5px 5px 4px}
+.pd-rounded{border-radius:18px;padding:8px 8px 6px}.pd-rounded img,.pd-rounded .slot{border-radius:12px}
+.pd-arch{--bw:180px;border-radius:999px 999px 8px 8px;padding:9px 9px 8px}.pd-arch img,.pd-arch .slot{aspect-ratio:4/5;border-radius:999px 999px 3px 3px}
+.pd-none,.pd-circle,.pd-heart,.pd-taped{background:none;padding:0;box-shadow:none;filter:drop-shadow(0 4px 6px rgba(0,0,0,.4))}
+.pd-none .tape,.pd-circle .tape,.pd-heart .tape,.pd-taped .tape,.pd-film .tape{display:none}
+.pd-none input,.pd-circle input,.pd-heart input,.pd-taped input{color:var(--pi,#F6F3EC)}
+.cover .pd-none input,.cover .pd-circle input,.cover .pd-heart input,.cover .pd-taped input{color:var(--ci)}
+.pd-circle{--bw:190px}.pd-circle img,.pd-circle .slot{border-radius:50%;border:8px solid var(--fc)}
+.pd-heart{--bw:210px}.pd-heart img,.pd-heart .slot{aspect-ratio:20/18.4;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 3 20 18.4' preserveAspectRatio='none'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center/100% 100% no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 3 20 18.4' preserveAspectRatio='none'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.pd-film{padding:24px 12px}
+.pd-film::before,.pd-film::after{content:"";position:absolute;left:8px;right:8px;height:8px;background:repeating-linear-gradient(90deg,#F6F3EC 0 8px,transparent 8px 16px)}
+.pd-film::before{top:8px}.pd-film::after{bottom:8px}
+.pd-taped img,.pd-taped .slot{border:6px solid var(--fc)}
+.pd-taped::before,.pd-taped::after{content:"";position:absolute;top:-6px;width:60px;height:22px;z-index:2;background:repeating-linear-gradient(90deg,var(--tape1) 0 8px,var(--tape2) 8px 14px);opacity:.95}
+.pd-taped::before{left:-18px;transform:rotate(-38deg)}.pd-taped::after{right:-18px;transform:rotate(38deg)}
+.nb .polaroid{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.42);pointer-events:none}
+#psty{margin:auto auto 8px;max-height:72vh;overflow:auto;width:min(580px,94vw)}
+#psty::backdrop{background:rgba(8,14,30,.12)}
 /* controls */
 #ctrl{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:2px 12px 18px}
 #lbl{font-family:'Caveat',cursive;font-size:26px;min-width:150px;text-align:center}
@@ -229,6 +250,13 @@ canvas{background:var(--navy);border:2px dashed var(--pale);border-radius:8px;to
 <dialog id="tpl">
  <h2 class="dlgh">start a new page</h2><div id="tplList"></div>
  <div class="row"><button class="tool" id="tplX">cancel</button></div>
+</dialog>
+<dialog id="psty">
+ <h2 class="dlgh">photo style</h2>
+ <p class="lbl">design</p><div class="pick pickN" id="pdList"></div>
+ <p class="lbl">frame colour</p><div class="sw" id="pcList"></div>
+ <p class="lbl">size</p><input type="range" id="pszRange" min="50" max="200" step="5" aria-label="Photo size" style="width:100%;accent-color:var(--pale)">
+ <div class="row"><button class="tool" id="pstyDone" type="button">done</button></div>
 </dialog>
 <dialog id="tsty">
  <h2 class="dlgh">text style</h2>
@@ -534,7 +562,13 @@ function el(it){
  if(it.type==='polaroid'){d.className+=' polaroid';d.innerHTML='<i class="tape"></i>'+(it.img_path?'<img alt="">':'<button class="slot" type="button">'+(editing?'tap to add<br>a photo':'')+'</button>')+'<input maxlength="40" aria-label="Caption">';
   if(it.img_path)sign(it.img_path).then(u=>{if(u)d.querySelector('img').src=u});
   else d.querySelector('.slot').onclick=()=>{if(!editing)return;slotTarget=it;$('#file').click()};
-  const i=d.querySelector('input');i.value=it.text||'';i.readOnly=!editing;if(editing)i.placeholder='caption';if(!editing&&!it.text)i.style.display='none';i.oninput=()=>patch(it,{text:i.value})}
+  const i=d.querySelector('input');i.value=it.text||'';i.readOnly=!editing;if(editing)i.placeholder='caption';if(!editing&&!it.text)i.style.display='none';i.oninput=()=>patch(it,{text:i.value});
+  const pget=()=>{const q=(it.k||'polaroid:auto:1').split(':');return{d:PKS.some(x=>x[0]===q[0])?q[0]:'polaroid',c:q[1] in TCOL?q[1]:'auto',s:Math.min(2,Math.max(.5,parseFloat(q[2])||1))}};
+  const papply=()=>{const o=pget();[...d.classList].filter(c=>c.startsWith('pd-')).forEach(c=>d.classList.remove(c));d.classList.add('pd-'+o.d);frameVars(d,o.d,o.c);d.style.setProperty('--ps',o.s)};
+  const pset=o=>{const c=Object.assign(pget(),o);patch(it,{k:c.d+':'+c.c+':'+c.s});papply()};
+  papply();
+  const sh=document.createElement('button');sh.className='shp';sh.type='button';sh.textContent='▣';sh.title='Photo style';sh.setAttribute('aria-label','Change photo style');
+  sh.onclick=()=>openPStyle({get:pget,set:pset,img:()=>urls[it.img_path]});d.append(sh)}
  else if(it.type==='note'){d.className+=' note s-'+(it.k||'torn')+(it.blue?' blue':'');d.innerHTML='<i class="tape"></i><textarea aria-label="Note"></textarea>';
   const a=d.querySelector('textarea');a.value=it.text||'';a.readOnly=!editing;if(editing)a.placeholder='write something…';a.oninput=()=>patch(it,{text:a.value});
   const sh=document.createElement('button');sh.className='shp';sh.type='button';sh.textContent='◇';sh.title='Change shape';sh.setAttribute('aria-label','Change note shape');
@@ -759,6 +793,30 @@ function updT(){if(!tTarget)return;const o=tTarget.get();
  document.querySelectorAll('#tsty [data-tc]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tc===o.c));
  const r=$('#szRange');r.min=tTarget.min*100;r.max=tTarget.max*100;r.value=Math.round(o.s*100)}
 function openTStyle(t){tTarget=t;updT();$('#tsty').showModal()}
+
+// ---------- photo style ----------
+const PKS=[['polaroid','polaroid'],['wide','wide instant'],['mini','mini'],['thin','thin border'],['none','no border'],['rounded','rounded'],['circle','circle'],['arch','arch'],['heart','heart'],['film','film strip'],['taped','taped print']];
+const SAMPLE="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%238fa6d1'/%3E%3Cstop offset='1' stop-color='%23dce6f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23g)'/%3E%3Ccircle cx='70' cy='30' r='12' fill='%23f6f3ec'/%3E%3Cpath d='M0 100V70l25-18 25 22 25-16 25 20v22z' fill='%232d4f86'/%3E%3C/svg%3E";
+let pTarget=null;
+function frameVars(el,design,c){const hex=TCOL[c]||'';const base=hex||(design==='film'?'#101624':'');
+ el.style.setProperty('--fc',base||'var(--ink)');
+ let dark=design==='film'&&!hex;if(hex){const n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;dark=(.299*r+.587*g+.114*b)/255<.5}
+ el.style.setProperty('--fi',dark?'#F6F3EC':'#14213D')}
+(function(){
+ PKS.forEach(([k,name])=>{const b=document.createElement('button');b.type='button';b.className='nb';b.dataset.pd=k;b.setAttribute('aria-label',name);
+  b.innerHTML=`<div class="polaroid pd-${k}"><i class="tape"></i><img alt="" src="${SAMPLE}"><input readonly tabindex="-1" value="caption"></div><span class="nl">${name}</span>`;
+  b.onclick=()=>{if(pTarget){pTarget.set({d:k});updP()}};$('#pdList').append(b)});
+ Object.entries(TCOL).forEach(([k,v])=>{const b=document.createElement('button');b.type='button';b.dataset.pc=k;b.setAttribute('aria-label',k);
+  if(v){b.className='swc';b.style.background=v}else{b.className='tool small';b.textContent='auto'}
+  b.onclick=()=>{if(pTarget){pTarget.set({c:k});updP()}};$('#pcList').append(b)});
+ $('#pszRange').oninput=e=>{if(pTarget)pTarget.set({s:e.target.value/100})};
+ $('#pstyDone').onclick=()=>$('#psty').close();
+})();
+function updP(){if(!pTarget)return;const o=pTarget.get();
+ document.querySelectorAll('#pdList .nb').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.pd===o.d);frameVars(b.querySelector('.polaroid'),b.dataset.pd,o.c)});
+ document.querySelectorAll('#pcList [data-pc]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.pc===o.c));
+ $('#pszRange').value=Math.round(o.s*100)}
+function openPStyle(t){pTarget=t;const u=t.img&&t.img();document.querySelectorAll('#pdList img').forEach(i=>i.src=u||SAMPLE);updP();$('#psty').showModal()}
 </script>
 </body>
 </html>
