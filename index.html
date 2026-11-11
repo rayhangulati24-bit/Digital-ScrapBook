@@ -21,6 +21,7 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .small{padding:3px 12px;font-size:16px;opacity:.85}
 .tools{display:flex;flex-wrap:wrap;gap:8px;padding:6px 16px 10px}
 #stage{position:relative;perspective:2200px;margin:0 12px 10px;height:max(540px,calc(100vh - 190px))}
+#stage.dropping{outline:3px dashed var(--pale);outline-offset:-8px}
 .sheet{position:absolute;inset:0;border-radius:10px;border:3px solid var(--ink);overflow:hidden;transform-origin:left center;backface-visibility:hidden;-webkit-backface-visibility:hidden;touch-action:pan-y;
  background-color:var(--navy2);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
 .sheet{--pl:rgba(246,243,236,.14);--pi:#F6F3EC;--bc:#F6F3EC}
@@ -172,10 +173,19 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .pd-thin{padding:5px 5px 4px}
 .pd-rounded{border-radius:18px;padding:8px 8px 6px}.pd-rounded img,.pd-rounded .slot{border-radius:12px}
 .pd-arch{--bw:180px;border-radius:999px 999px 8px 8px;padding:9px 9px 8px}.pd-arch img,.pd-arch .slot{aspect-ratio:4/5;border-radius:999px 999px 3px 3px}
-.pd-none,.pd-circle,.pd-heart,.pd-taped{background:none;padding:0;box-shadow:none;filter:drop-shadow(0 4px 6px rgba(0,0,0,.4))}
-.pd-none .tape,.pd-circle .tape,.pd-heart .tape,.pd-taped .tape,.pd-film .tape{display:none}
-.pd-none input,.pd-circle input,.pd-heart input,.pd-taped input{color:var(--pi,#F6F3EC)}
-.cover .pd-none input,.cover .pd-circle input,.cover .pd-heart input,.cover .pd-taped input{color:var(--ci)}
+.pd-none,.pd-circle,.pd-oval,.pd-heart,.pd-taped{background:none;padding:0;box-shadow:none;filter:drop-shadow(0 4px 6px rgba(0,0,0,.4))}
+.pd-none .tape,.pd-circle .tape,.pd-oval .tape,.pd-heart .tape,.pd-taped .tape,.pd-film .tape{display:none}
+.pd-none input,.pd-circle input,.pd-oval input,.pd-heart input,.pd-taped input{color:var(--pi,#F6F3EC)}
+.cover .pd-none input,.cover .pd-circle input,.cover .pd-oval input,.cover .pd-heart input,.cover .pd-taped input{color:var(--ci)}
+/* portrait frames */
+.pd-portrait{--bw:180px}.pd-portrait img,.pd-portrait .slot{aspect-ratio:3/4}
+.pd-phone{--bw:150px}.pd-phone img,.pd-phone .slot{aspect-ratio:9/16}
+.pd-oval{--bw:180px}.pd-oval img,.pd-oval .slot{aspect-ratio:3/4;border-radius:50%;border:8px solid var(--fc)}
+.pd-bookmark{--bw:170px}.pd-bookmark img,.pd-bookmark .slot{aspect-ratio:3/4;clip-path:polygon(0 0,100% 0,100% 100%,50% 86%,0 100%)}
+/* landscape frames */
+.pd-cinema{--bw:280px}.pd-cinema img,.pd-cinema .slot{aspect-ratio:16/9}
+.pd-panorama{--bw:300px}.pd-panorama img,.pd-panorama .slot{aspect-ratio:21/9}
+.pd-postcard{--bw:260px}.pd-postcard img,.pd-postcard .slot{aspect-ratio:3/2}
 .pd-circle{--bw:190px}.pd-circle img,.pd-circle .slot{border-radius:50%;border:8px solid var(--fc)}
 .pd-heart{--bw:210px}.pd-heart img,.pd-heart .slot{aspect-ratio:20/18.4;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 3 20 18.4' preserveAspectRatio='none'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center/100% 100% no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 3 20 18.4' preserveAspectRatio='none'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center/100% 100% no-repeat}
 .pd-film{padding:24px 12px}
@@ -829,11 +839,29 @@ $('#del').onclick=async()=>{if(idx<1)return;const p=S.pages[idx-1];
  if(paths.length)sb.storage.from('photos').remove(paths);
  idx=Math.min(idx,S.pages.length);show()};
 $('#addPhoto').onclick=()=>{slotTarget=null;$('#file').click()};
-$('#file').onchange=e=>{const f=e.target.files[0];e.target.value='';const slot=slotTarget;slotTarget=null;if(!f)return;
+function addPhotoFile(f,x,y){if(!f)return;const slot=slotTarget;slotTarget=null;
  const im=new Image();im.onload=()=>{const k=Math.min(1,900/Math.max(im.width,im.height));const c=document.createElement('canvas');
   c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(im.src);
-  c.toBlob(async b=>{const p=await upload(b,'jpg');if(p){if(slot){patch(slot,{img_path:p});refresh()}else add({type:'polaroid',img_path:p,text:''})}},'image/jpeg',.82)};
- im.src=URL.createObjectURL(f)};
+  c.toBlob(async b=>{const p=await upload(b,'jpg');if(!p)return;
+   if(slot){patch(slot,{img_path:p});refresh()}
+   else{const o={type:'polaroid',img_path:p,text:''};if(x!==undefined){o.x=x;o.y=y}add(o)}},'image/jpeg',.82)};
+ im.src=URL.createObjectURL(f)}
+$('#file').onchange=e=>{const f=e.target.files[0];e.target.value='';addPhotoFile(f)};
+// Drag and drop photos straight from your computer onto the page — the
+// same downscale-and-upload path as the + photo button. Only in edit mode;
+// the window-level handlers stop the browser navigating to a dropped file.
+const stageEl=$('#stage');let dropDepth=0;
+const hasFiles=e=>[...(e.dataTransfer?.types||[])].includes('Files');
+addEventListener('dragover',e=>{if(hasFiles(e))e.preventDefault()});
+addEventListener('drop',e=>{if(hasFiles(e))e.preventDefault()});
+stageEl.addEventListener('dragenter',e=>{if(!editing||!hasFiles(e))return;e.preventDefault();dropDepth++;stageEl.classList.add('dropping')});
+stageEl.addEventListener('dragover',e=>{if(!editing||!hasFiles(e))return;e.preventDefault();e.dataTransfer.dropEffect='copy'});
+stageEl.addEventListener('dragleave',()=>{dropDepth=Math.max(0,dropDepth-1);if(!dropDepth)stageEl.classList.remove('dropping')});
+stageEl.addEventListener('drop',e=>{if(!editing||!hasFiles(e))return;e.preventDefault();dropDepth=0;stageEl.classList.remove('dropping');
+ const files=[...(e.dataTransfer?.files||[])].filter(f=>f.type.startsWith('image/'));
+ if(!files.length)return;
+ const r=stageEl.getBoundingClientRect();
+ files.forEach((f,n)=>{const x=Math.max(10,Math.min(r.width-220,e.clientX-r.left-100+n*24));const y=Math.max(10,Math.min(r.height-240,e.clientY-r.top-110+n*24));addPhotoFile(f,x,y)})});
 
 // doodle pad
 const cv=$('#cv'),cx=cv.getContext('2d');let pen=false;
@@ -973,7 +1001,7 @@ function updT(){if(!tTarget)return;const o=tTarget.get();
 function openTStyle(t){tTarget=t;updT();$('#tsty').showModal()}
 
 // ---------- photo style ----------
-const PKS=[['polaroid','polaroid'],['wide','wide instant'],['mini','mini'],['thin','thin border'],['none','no border'],['rounded','rounded'],['circle','circle'],['arch','arch'],['heart','heart'],['film','film strip'],['taped','taped print']];
+const PKS=[['polaroid','polaroid'],['wide','wide instant'],['mini','mini'],['thin','thin border'],['none','no border'],['rounded','rounded'],['circle','circle'],['arch','arch'],['heart','heart'],['film','film strip'],['taped','taped print'],['portrait','portrait'],['phone','phone shot'],['oval','oval'],['bookmark','bookmark'],['cinema','cinema'],['panorama','panorama'],['postcard','postcard']];
 const SAMPLE="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%238fa6d1'/%3E%3Cstop offset='1' stop-color='%23dce6f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23g)'/%3E%3Ccircle cx='70' cy='30' r='12' fill='%23f6f3ec'/%3E%3Cpath d='M0 100V70l25-18 25 22 25-16 25 20v22z' fill='%232d4f86'/%3E%3C/svg%3E";
 let pTarget=null;
 function frameVars(el,design,c){const hex=TCOL[c]||'';const base=hex||(design==='film'?'#101624':'');
