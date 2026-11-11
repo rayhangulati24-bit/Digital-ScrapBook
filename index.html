@@ -188,6 +188,7 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 /* controls */
 #ctrl{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:2px 12px 18px}
 #lbl{font-family:'Caveat',cursive;font-size:26px;min-width:150px;text-align:center}
+#sv{font-size:14px;color:var(--pale);min-height:1.2em}
 .tool:disabled{opacity:.35;cursor:default}
 dialog{background:var(--navy2);color:var(--ink);border:3px solid var(--ink);border-radius:14px;padding:16px;max-width:96vw}
 dialog::backdrop{background:rgba(8,14,30,.7)}
@@ -238,7 +239,7 @@ canvas{background:var(--navy);border:2px dashed var(--pale);border-radius:8px;to
  <main id="stage" aria-live="polite"></main>
  <div id="ctrl">
   <button class="tool" id="prev" aria-label="Previous page">‹ back</button>
-  <span id="lbl"></span>
+  <span id="lbl"></span><span id="sv" role="status"></span>
   <button class="tool" id="next" aria-label="Next page">next ›</button>
   <button class="tool" id="play" aria-pressed="false">▶ slideshow</button>
  </div>
@@ -310,7 +311,7 @@ canvas{background:var(--navy);border:2px dashed var(--pale);border-radius:8px;to
 <script src="config.js"></script>
 <script>
 const $=s=>document.querySelector(s);
-function fail(m){const b=document.getElementById('err');if(b.hidden){b.hidden=false;b.textContent=m}}
+function fail(m){const b=document.getElementById('err');b.hidden=false;b.textContent=m}
 addEventListener('error',e=>fail('Something went wrong: '+(e.message||'unknown error')+(e.lineno?' (line '+e.lineno+')':'')));
 addEventListener('unhandledrejection',e=>fail('Something went wrong: '+((e.reason&&e.reason.message)||e.reason)));
 const C=window.SCRAPBOOK||{};
@@ -320,6 +321,11 @@ else if(!C.url||!C.key||/YOUR-/.test(C.url+C.key))fail('config.js is missing or 
 else{try{sb=supabase.createClient(C.url,C.key)}catch(e){fail('Couldn’t connect to Supabase: '+e.message)}}
 if(!sb)throw new Error('Not connected');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+// NOTE: these cover defaults are only for a brand-new scrapbook. Once a title /
+// subtitle has been saved, it lives in Supabase (settings rows cover_title and
+// cover_sub) and readSettings() loads it over these defaults — so editing the
+// text here in the code will NOT change an existing scrapbook. Edit the cover
+// text in the app instead; that is what saveSettingNow() persists.
 let S={pages:[],items:[],styles:{},cover:{title:'our scrapbook',sub:'for us, wherever we are',frame:true,ul:true,paper:'white',pos:{t:{x:.5,y:.4,s:1},s:{x:.5,y:.58,s:1}}}},me=null,started=false;
 let idx=0,editing=false,busy=false,playT=null;
 const urls={},pending={},timers={};
@@ -525,6 +531,13 @@ async function start(){
  }
  const[i,s]=await Promise.all([sb.from('items').select(),sb.from('settings').select()]);
  S.pages=p.data||[];S.items=i.data||[];readSettings(s.data);
+ // Diagnostic: the cover silently showed its defaults when the settings
+ // load returned nothing, so say out loud what actually came back.
+ // If this line says "loaded 0 settings", the app's settings read is
+ // returning empty; if it shows the stored cover text but the cover
+ // page still shows the default, the load is fine and rendering is not.
+ if(s.error)fail('Couldn’t load settings: '+(s.error.message||s.error));
+ const svL=$('#sv');if(svL)svL.textContent=s.error?'settings failed to load — see the message at the top':'loaded '+((s.data||[]).length)+' setting'+(((s.data||[]).length===1)?'':'s')+' · cover: "'+S.cover.title+'"';
  if(!(s.data||[]).some(r=>r.key==='cover_seeded'))await seedCover();
  show();
  sb.channel('scrap')
@@ -538,7 +551,7 @@ async function start(){
   .subscribe();
 }
 async function seedCover(){
- await sb.from('settings').upsert({key:'cover_seeded',value:'1'});
+ await saveSettingNow('cover_seeded','1');
  const b=$('#stage').getBoundingClientRect(),w=b.width||360,hh=b.height||600;let z=Math.max(0,...S.items.map(i=>i.z||0));
  const st=(k,fx,fy,r)=>({page:null,type:'sticker',k,r,z:++z,x:Math.round(fx*(w-90)),y:Math.round(fy*(hh-100))});
  const rows=[st('star',.02,.04,-12),st('plane',.98,.05,10),st('moon',.02,.8,8),st('heart',.98,.78,-8),
@@ -552,7 +565,26 @@ function soft(){const a=document.activeElement;if(busy||(a&&a.closest&&a.closest
 function patch(it,f){Object.assign(it,f);pending[it.id]=Object.assign(pending[it.id]||{},f);
  clearTimeout(timers[it.id]);timers[it.id]=setTimeout(async()=>{const d=pending[it.id];delete pending[it.id];
   await sb.from('items').update(d).eq('id',it.id)},500)}
-function saveSetting(key,value){clearTimeout(timers[key]);timers[key]=setTimeout(()=>sb.from('settings').upsert({key,value}),600)}
+function saveSetting(key,value){clearTimeout(timers[key]);timers[key]=setTimeout(()=>saveSettingNow(key,value),600)}
+// Cover/page settings live in Supabase, not in git — deploying new code must never
+// change them. Two things used to lose them silently, so both are fixed here:
+//  1. the old code did a bare upsert() with no error check, so a failed save
+//     (e.g. RLS, or no unique constraint on settings.key) looked saved in the
+//     app but reverted on the next load / deploy. Saves now report failures.
+//  2. a bare upsert() inserts a duplicate row when settings.key is not unique,
+//     and readSettings() then picks whichever duplicate the database returns
+//     first. So this now updates every row with that key if one exists, and
+//     only inserts when there is none — it works whether or not key is unique.
+async function saveSettingNow(key,value){clearTimeout(timers[key]);
+ const sv=$('#sv');if(sv)sv.textContent='saving…';
+ try{const{data,error:selErr}=await sb.from('settings').select('key').eq('key',key).limit(1);
+  if(selErr)throw selErr;
+  const res=(data&&data.length)
+   ?await sb.from('settings').update({value}).eq('key',key)
+   :await sb.from('settings').insert({key,value});
+  if(res.error)throw res.error;
+  if(sv)sv.textContent='saved ✓ '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+ }catch(e){if(sv)sv.textContent='save failed — see the message at the top';fail('Couldn’t save “'+key+'”: '+(e.message||e))}}
 async function add(o){const b=$('#stage').getBoundingClientRect();
  const row=Object.assign({page:idx?S.pages[idx-1].id:null,x:30+Math.random()*Math.max(40,b.width-280),y:30+Math.random()*Math.max(40,b.height-300),r:rot(),z:Math.max(0,...S.items.map(i=>i.z||0))+1},o);
  const{data,error}=await sb.from('items').insert(row).select().single();
@@ -585,6 +617,11 @@ function sheet(i){
   t.value=S.cover.title;s.value=S.cover.sub;t.readOnly=s.readOnly=!editing;
   t.oninput=()=>{S.cover.title=t.value;saveSetting('cover_title',t.value)};
   s.oninput=()=>{S.cover.sub=s.value;saveSetting('cover_sub',s.value)};
+  // Save immediately when you finish editing, not only after the 600ms
+  // debounce — otherwise closing the tab / redeploying within that window
+  // loses the last keystrokes.
+  t.onchange=()=>saveSettingNow('cover_title',t.value);
+  s.onchange=()=>saveSettingNow('cover_sub',s.value);
   d.querySelectorAll('.ctb').forEach(bx=>{const k=bx.dataset.b,pos=()=>S.cover.pos[k],inp=bx.querySelector('input');
    const apply=()=>{const q=pos();bx.style.left=q.x*100+'%';bx.style.top=q.y*100+'%';bx.style.setProperty('--sc',q.s);
     const F=FONTS.find(x=>x[0]===q.f);inp.style.fontFamily=F?F[2]:'';inp.style.fontWeight=F?F[3]:'';inp.style.fontStyle=F?F[4]:'';inp.style.color=TCOL[q.c]||''};apply();
