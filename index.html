@@ -333,6 +333,10 @@ else if(!C.url||!C.key||/YOUR-/.test(C.url+C.key))fail('config.js is missing or 
 else{try{sb=supabase.createClient(C.url,C.key)}catch(e){fail('Couldn’t connect to Supabase: '+e.message)}}
 if(!sb)throw new Error('Not connected');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Bump this on every delivery. It is shown in the status line after login,
+// so you can tell at a glance which version of this file the live site is
+// actually running — the cause of the "new frames not showing" confusion.
+const APP_VERSION='2026-11-11-frames';
 // NOTE: these cover defaults are only for a brand-new scrapbook. Once a title /
 // subtitle has been saved, it lives in Supabase (settings rows cover_title and
 // cover_sub) and readSettings() loads it over these defaults — so editing the
@@ -569,7 +573,7 @@ async function start(){
  // returning empty; if it shows the stored cover text but the cover
  // page still shows the default, the load is fine and rendering is not.
  if(s.error)fail('Couldn’t load settings: '+(s.error.message||s.error));
- const svL=$('#sv');if(svL)svL.textContent=s.error?'settings failed to load — see the message at the top':'loaded '+((s.data||[]).length)+' setting'+(((s.data||[]).length===1)?'':'s')+' · cover: "'+S.cover.title+'"';
+ const svL=$('#sv');if(svL)svL.textContent=s.error?'settings failed to load — see the message at the top':'loaded '+((s.data||[]).length)+' setting'+(((s.data||[]).length===1)?'':'s')+' · cover: "'+S.cover.title+'" · '+APP_VERSION;
  if(!(s.data||[]).some(r=>r.key==='cover_seeded'))await seedCover();
  show();
  sb.channel('scrap')
