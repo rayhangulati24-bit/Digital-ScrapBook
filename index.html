@@ -93,11 +93,17 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .pickT{gap:16px 12px;padding-top:6px}
 #sty{margin:auto auto 8px;max-height:62vh;overflow:auto;width:min(480px,94vw)}
 #sty::backdrop{background:rgba(8,14,30,.12)}
-.sw{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}
+.sw{display:flex;flex-wrap:wrap;gap:12px;margin:8px 0 16px}
 .lbl{margin:6px 0 0;font-size:16px;color:var(--pale)}
-.swc{width:34px;height:34px;border-radius:50%;border:2px solid var(--ink);cursor:pointer;padding:0}
-#sty [aria-pressed=true],#tsty [aria-pressed=true],#psty [aria-pressed=true],#dsty [aria-pressed=true],#pick [aria-pressed=true],#dlg [aria-pressed=true]{outline:3px solid var(--pale);outline-offset:2px}
+/* style-dialog sections: clear separation so font and colour never run together */
+#tsty .lbl,#sty .lbl,#psty .lbl,#dsty .lbl,#nsty .lbl{margin-top:18px;font-size:17px;font-weight:700}
+#tsty .lbl:first-of-type,#sty .lbl:first-of-type,#psty .lbl:first-of-type,#dsty .lbl:first-of-type,#nsty .lbl:first-of-type{margin-top:6px}
+#tsty .lbl:not(:first-of-type),#sty .lbl:not(:first-of-type),#psty .lbl:not(:first-of-type),#dsty .lbl:not(:first-of-type),#nsty .lbl:not(:first-of-type){border-top:1px dashed rgba(175,195,230,.4);padding-top:14px}
+.swc{width:40px;height:40px;border-radius:50%;border:2px solid var(--ink);cursor:pointer;padding:0}
+#sty [aria-pressed=true],#tsty [aria-pressed=true],#psty [aria-pressed=true],#dsty [aria-pressed=true],#nsty [aria-pressed=true],#pick [aria-pressed=true],#dlg [aria-pressed=true]{outline:3px solid var(--pale);outline-offset:2px}
 #dsty{margin:auto auto 8px;max-height:64vh;overflow:auto;width:min(420px,94vw)}
+#nsty{margin:auto auto 8px;max-height:72vh;overflow:auto;width:min(520px,94vw)}
+#nsty::backdrop{background:rgba(8,14,30,.12)}
 #dsty::backdrop{background:rgba(8,14,30,.12)}
 #sty .tool.small[aria-pressed=true]{background:var(--ink);color:var(--navy)}
 /* note shapes */
@@ -153,9 +159,10 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .label textarea.f-serif{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:400}
 #tsty{margin:auto auto 8px;max-height:64vh;overflow:auto;width:min(520px,94vw)}
 #tsty::backdrop{background:rgba(8,14,30,.12)}
-.fl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin:6px 0 12px}
-.fb{background:none;border:2px dashed var(--pale);border-radius:8px;color:var(--ink);font-size:23px;line-height:1.1;padding:5px 10px;text-align:left;cursor:pointer}
-.fb small{display:block;font:15px 'Patrick Hand',sans-serif;opacity:.7}
+.fl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:8px 0 16px}
+.fb{background:none;border:2px dashed var(--pale);border-radius:8px;color:var(--ink);font-size:23px;line-height:1.15;padding:8px 10px;text-align:left;cursor:pointer;min-height:66px;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.fb small{display:block;font:15px 'Patrick Hand',sans-serif;opacity:.7;line-height:1.2}
+#tPrev{font-size:34px;text-align:center;padding:14px 10px;margin:4px 0 6px;border:2px dashed var(--pale);border-radius:10px;min-height:66px;display:grid;place-items:center;overflow:hidden;line-height:1.15}
 #szRange{width:100%;accent-color:var(--pale);margin:6px 0 4px}
 /* photo designs */
 .pd-wide{--bw:260px}.pd-wide img,.pd-wide .slot{aspect-ratio:4/3}
@@ -239,6 +246,7 @@ canvas{background:var(--navy);border:2px dashed var(--pale);border-radius:8px;to
 
 <dialog id="nshape">
  <h2 class="dlgh">pick a note</h2>
+ <p class="lbl">paper colour</p><div class="sw" id="npCol"></div>
  <div class="pick pickN" id="nGrid"></div>
  <div class="row"><button class="tool" id="nX" type="button">cancel</button></div>
 </dialog>
@@ -263,6 +271,7 @@ canvas{background:var(--navy);border:2px dashed var(--pale);border-radius:8px;to
 </dialog>
 <dialog id="tsty">
  <h2 class="dlgh">text style</h2>
+ <div id="tPrev" aria-hidden="true">Hello love</div>
  <p class="lbl">font</p><div class="fl" id="fontList"></div>
  <p class="lbl">colour</p><div class="sw" id="colList"></div>
  <p class="lbl">size</p><input type="range" id="szRange" step="5" aria-label="Text size">
@@ -273,6 +282,15 @@ canvas{background:var(--navy);border:2px dashed var(--pale);border-radius:8px;to
  <p class="lbl">colour</p><div class="sw" id="dcList"></div>
  <p class="lbl" style="opacity:.8">“auto” follows the page — cream on dark paper, navy on light paper.</p>
  <div class="row"><button class="tool" id="dstyDone" type="button">done</button></div>
+</dialog>
+<dialog id="nsty">
+ <h2 class="dlgh">note style</h2>
+ <p class="lbl">shape</p><div class="fl" id="nsShape"></div>
+ <p class="lbl">paper colour</p><div class="sw" id="nsPaper"></div>
+ <p class="lbl">ink colour</p><div class="sw" id="nsInk"></div>
+ <p class="lbl">font</p><div class="fl" id="nsFont"></div>
+ <p class="lbl">size</p><input type="range" id="nsSize" min="70" max="160" step="5" aria-label="Note size" style="width:100%;accent-color:var(--pale)">
+ <div class="row"><button class="tool" id="nstyDone" type="button">done</button></div>
 </dialog>
 <dialog id="sty">
  <h2 class="dlgh">style this page</h2>
@@ -475,6 +493,13 @@ function buildColorSwatches(box,get,set){
   box.append(b)});
  updColorSwatches(box,get)}
 function tintPickPreviews(){const hex=doodleHex(newDoodleColor);document.querySelectorAll('#pkS .pk svg,#pkD .pk svg').forEach(s=>s.style.stroke=hex)}
+// ---------- note style ----------
+// Notes store their style in `k` as "shape:paper:font:size:ink", e.g. "heart:pink:bold:1.2:auto".
+// Old notes with a plain `k` ("heart") keep working: paper comes from the old `blue` flag
+// (pale blue) or defaults to cream, font to handwriting, size to 1, ink to auto.
+// This reuses the existing `k` column, so no Supabase migration is needed.
+const noteParts=it=>{const q=String(it.k||'torn').split(':');return{shape:q[0]||'torn',paper:q[1] in TCOL?q[1]:(it.blue?'pale':'auto'),font:FONTS.some(x=>x[0]===q[2])?q[2]:'hand',size:Math.min(1.6,Math.max(.7,parseFloat(q[3])||1)),ink:q[4] in TCOL?q[4]:'auto'}};
+const isDarkHex=h=>{const n=parseInt(String(h||'').slice(1),16);if(isNaN(n))return false;return(.299*(n>>16)+.587*((n>>8)&255)+.114*(n&255))/255<.5};
 const sid=()=>idx===0?'cover':(S.pages[idx-1]||{}).id;
 
 // ---------- auth ----------
@@ -597,10 +622,18 @@ function el(it){
   papply();
   const sh=document.createElement('button');sh.className='shp';sh.type='button';sh.textContent='▣';sh.title='Photo style';sh.setAttribute('aria-label','Change photo style');
   sh.onclick=()=>openPStyle({get:pget,set:pset,img:()=>urls[it.img_path]});d.append(sh)}
- else if(it.type==='note'){d.className+=' note s-'+(it.k||'torn')+(it.blue?' blue':'');d.innerHTML='<i class="tape"></i><textarea aria-label="Note"></textarea>';
+ else if(it.type==='note'){d.innerHTML='<i class="tape"></i><textarea aria-label="Note"></textarea>';
   const a=d.querySelector('textarea');a.value=it.text||'';a.readOnly=!editing;if(editing)a.placeholder='write something…';a.oninput=()=>patch(it,{text:a.value});
-  const sh=document.createElement('button');sh.className='shp';sh.type='button';sh.textContent='◇';sh.title='Change shape';sh.setAttribute('aria-label','Change note shape');
-  sh.onclick=()=>{const ks=NSHAPES.map(s=>s[0]);patch(it,{k:ks[(ks.indexOf(it.k||'torn')+1)%ks.length]});refresh()};d.append(sh)}
+  const get=()=>noteParts(it);
+  const apply=()=>{const o=get(),F=FONTS.find(x=>x[0]===o.f)||FONTS[0],paper=TCOL[o.paper]||'#F6F3EC';
+   d.className='item note s-'+o.shape;d.style.setProperty('--np',paper);
+   a.style.fontFamily=F[2];a.style.fontWeight=F[3];a.style.fontStyle=F[4];
+   a.style.fontSize=Math.round(24*o.size)+'px';a.style.lineHeight=(o.shape==='card'||o.shape==='notebook')?Math.round(28*o.size)+'px':'1.15';
+   a.style.color=o.ink!=='auto'?TCOL[o.ink]:(isDarkHex(paper)?'#F6F3EC':'#14213D')};
+  const set=o=>{const c=Object.assign(get(),o);patch(it,{k:[c.shape,c.paper,c.font,Math.round(c.size*100)/100,c.ink].join(':'),blue:c.paper==='pale'});apply()};
+  apply();
+  const sh=document.createElement('button');sh.className='shp';sh.type='button';sh.textContent='◇';sh.title='Note style';sh.setAttribute('aria-label','Change note style');
+  sh.onclick=()=>openNStyle({get,set});d.append(sh)}
  else if(it.type==='phrase'){d.className+=(it.blue?' blue':'');
   d.innerHTML='<i class="tape"></i><textarea aria-label="Inside joke"></textarea>';
   const a=d.querySelector('textarea');a.value=it.text||'';a.readOnly=!editing;
@@ -803,12 +836,34 @@ $('#styReset').onclick=()=>{const id=sid();if(!id)return;delete S.styles[id];sb.
 
 // ---------- note shapes ----------
 const NSHAPES=[['torn','torn paper'],['sticky','sticky note'],['card','index card'],['notebook','notebook page'],['ticket','ticket'],['ribbon','banner'],['tag','tag'],['round','round'],['heart','heart'],['cloud','cloud'],['star','star'],['speech','speech bubble']];
+let newNotePaper='auto';
+function tintNotePreviews(){const hex=TCOL[newNotePaper]||'';document.querySelectorAll('#nGrid .nb .note').forEach(n=>n.style.setProperty('--np',hex))}
 NSHAPES.forEach(([k,name],n)=>{const b=document.createElement('button');b.type='button';b.className='nb';b.setAttribute('aria-label',name);
  const bl=n%2===1;
  b.innerHTML=`<div class="note s-${k}${bl?' blue':''}"><i class="tape"></i><textarea readonly tabindex="-1">hello</textarea></div><span class="nl">${name}</span>`;
- b.onclick=()=>{$('#nshape').close();add({type:'note',text:'',k,blue:Math.random()<.4})};$('#nGrid').append(b)});
+ b.onclick=()=>{$('#nshape').close();add({type:'note',text:'',k:k+(newNotePaper==='auto'?'':':'+newNotePaper),blue:newNotePaper==='pale'})};$('#nGrid').append(b)});
+buildColorSwatches($('#npCol'),()=>newNotePaper,c=>{newNotePaper=c;tintNotePreviews()});
 $('#addNote').onclick=()=>$('#nshape').showModal();
 $('#nX').onclick=()=>$('#nshape').close();
+
+// ---------- note style (shape + paper + ink + font + size) ----------
+let nTarget=null;
+function updN(){if(!nTarget)return;const o=nTarget.get();
+ document.querySelectorAll('#nsShape [data-ns]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.ns===o.shape));
+ updColorSwatches($('#nsPaper'),()=>nTarget.get().paper);
+ updColorSwatches($('#nsInk'),()=>nTarget.get().ink);
+ document.querySelectorAll('#nsFont [data-tf]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tf===o.font));
+ $('#nsSize').value=Math.round(o.size*100)}
+function openNStyle(t){nTarget=t;updN();$('#nsty').showModal()}
+NSHAPES.forEach(([k,name])=>{const b=document.createElement('button');b.type='button';b.className='fb';b.dataset.ns=k;b.textContent=name;
+ b.onclick=()=>{if(nTarget){nTarget.set({shape:k});updN()}};$('#nsShape').append(b)});
+FONTS.forEach(f=>{const b=document.createElement('button');b.type='button';b.className='fb';b.dataset.tf=f[0];
+ b.style.fontFamily=f[2];b.style.fontWeight=f[3];b.style.fontStyle=f[4];b.innerHTML='Hello love<small>'+f[1]+'</small>';
+ b.onclick=()=>{if(nTarget){nTarget.set({font:f[0]});updN()}};$('#nsFont').append(b)});
+buildColorSwatches($('#nsPaper'),()=>nTarget?nTarget.get().paper:'auto',c=>{if(nTarget){nTarget.set({paper:c});updN()}});
+buildColorSwatches($('#nsInk'),()=>nTarget?nTarget.get().ink:'auto',c=>{if(nTarget){nTarget.set({ink:c});updN()}});
+$('#nsSize').oninput=e=>{if(nTarget){nTarget.set({size:e.target.value/100});updN()}};
+$('#nstyDone').onclick=()=>$('#nsty').close();
 
 // ---------- doodle style (colour) ----------
 let dTarget=null;
@@ -830,6 +885,7 @@ let tTarget=null;
  $('#tstyDone').onclick=()=>$('#tsty').close();
 })();
 function updT(){if(!tTarget)return;const o=tTarget.get();
+ const pv=$('#tPrev');if(pv){const F=FONTS.find(x=>x[0]===o.f)||FONTS[0];pv.style.fontFamily=F[2];pv.style.fontWeight=F[3];pv.style.fontStyle=F[4];pv.style.color=TCOL[o.c]||'var(--ink)';pv.style.fontSize=Math.round(34*o.s)+'px'}
  document.querySelectorAll('#tsty [data-tf]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tf===o.f));
  document.querySelectorAll('#tsty [data-tc]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tc===o.c));
  const r=$('#szRange');r.min=tTarget.min*100;r.max=tTarget.max*100;r.value=Math.round(o.s*100)}
