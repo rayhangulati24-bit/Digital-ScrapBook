@@ -214,8 +214,8 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
  #ctrl{padding:2px 8px 12px}
  #lbl{font-size:22px;min-width:0}
  .polaroid{max-width:82vw}
- .note{max-width:78vw}
- .label{max-width:82vw}
+ /* notes and labels grow in design pixels and the page auto-fits around
+    them, so no vw cap here — it would shrink them twice on small screens */
 }
 #lbl{font-family:'Caveat',cursive;font-size:26px;min-width:150px;text-align:center}
 #sv{font-size:14px;color:var(--pale);min-height:1.2em}
@@ -354,7 +354,7 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 // Bump this on every delivery. It is shown in the status line after login,
 // so you can tell at a glance which version of this file the live site is
 // actually running — the cause of the "new frames not showing" confusion.
-const APP_VERSION='2026-11-12-autofit';
+const APP_VERSION='2026-11-15-textgrow';
 // NOTE: these cover defaults are only for a brand-new scrapbook. Once a title /
 // subtitle has been saved, it lives in Supabase (settings rows cover_title and
 // cover_sub) and readSettings() loads it over these defaults — so editing the
@@ -715,6 +715,27 @@ function sheet(i){
  }
  return d;
 }
+// Text boxes grow horizontally as you type: the box widens to fit the
+// longest line (up to the right edge of the page), and only once it hits
+// that edge does the text wrap and the box grow taller instead. Deleting
+// text shrinks it back to its normal width. The base width is the box's
+// own width before it ever grew (its shape for notes, its size for
+// labels) — captured the first time the box is laid out, and re-captured
+// whenever its shape or size changes.
+const _mc=document.createElement('canvas').getContext('2d');
+function growText(d,a){
+ let base=parseFloat(d.dataset.bw);
+ if(!(base>0)){base=d.offsetWidth;if(base>0)d.dataset.bw=base}
+ _mc.font=getComputedStyle(a).font;
+ let w=0;
+ for(const l of (a.value||'').split('\n')){if(l)w=Math.max(w,_mc.measureText(l).width)}
+ const pad=d.clientWidth-a.clientWidth; // the box's own side padding
+ const maxW=Math.max(60,($('#stage').clientWidth/FIT)-(parseFloat(d.style.left)||0)-24);
+ if(base>0)d.style.width=Math.min(maxW,Math.max(base,Math.ceil(w)+pad+8))+'px';
+ a.style.height='auto';
+ const h=a.scrollHeight;
+ if(h>0){a.style.height=Math.min(h,560)+'px';a.style.overflow=h>560?'auto':'hidden'}
+}
 function el(it){
  const d=document.createElement('div');d.className='item '+it.type;
  const t=`rotate(${it.r}deg)`;d.style.cssText=`left:${it.x}px;top:${it.y}px;z-index:${(it.z||0)+1};transform:${t};--t:${t}`;
@@ -733,13 +754,14 @@ function el(it){
   const sh=document.createElement('button');sh.className='shp';sh.type='button';sh.textContent='▣';sh.title='Photo style';sh.setAttribute('aria-label','Change photo style');
   sh.onclick=()=>openPStyle({get:pget,set:pset,img:()=>urls[it.img_path]});d.append(sh)}
  else if(it.type==='note'){d.innerHTML='<i class="tape"></i><textarea aria-label="Note"></textarea>';
-  const a=d.querySelector('textarea');a.value=it.text||'';a.readOnly=!editing;if(editing)a.placeholder='write something…';a.oninput=()=>patch(it,{text:a.value});
+  const a=d.querySelector('textarea');a.value=it.text||'';a.readOnly=!editing;if(editing)a.placeholder='write something…';a.oninput=()=>{growText(d,a);patch(it,{text:a.value})};
   const get=()=>noteParts(it);
   const apply=()=>{const o=get(),F=FONTS.find(x=>x[0]===o.f)||FONTS[0],paper=TCOL[o.paper]||'#F6F3EC';
    d.className='item note s-'+o.shape;d.style.setProperty('--np',paper);
    a.style.fontFamily=F[2];a.style.fontWeight=F[3];a.style.fontStyle=F[4];
    a.style.fontSize=Math.round(24*o.size)+'px';a.style.lineHeight=(o.shape==='card'||o.shape==='notebook')?Math.round(28*o.size)+'px':'1.15';
-   a.style.color=o.ink!=='auto'?TCOL[o.ink]:(isDarkHex(paper)?'#F6F3EC':'#14213D')};
+   a.style.color=o.ink!=='auto'?TCOL[o.ink]:(isDarkHex(paper)?'#F6F3EC':'#14213D');
+   delete d.dataset.bw;d.style.width='';growText(d,a)};
   const set=o=>{const c=Object.assign(get(),o);patch(it,{k:[c.shape,c.paper,c.font,Math.round(c.size*100)/100,c.ink].join(':'),blue:c.paper==='pale'});apply()};
   apply();
   const sh=document.createElement('button');sh.className='shp';sh.type='button';sh.textContent='◇';sh.title='Note style';sh.setAttribute('aria-label','Change note style');
@@ -747,14 +769,14 @@ function el(it){
  else if(it.type==='phrase'){d.className+=(it.blue?' blue':'');
   d.innerHTML='<i class="tape"></i><textarea aria-label="Inside joke"></textarea>';
   const a=d.querySelector('textarea');a.value=it.text||'';a.readOnly=!editing;
-  const fit=()=>{a.rows=Math.max(1,a.value.split('\n').reduce((n,l)=>n+Math.max(1,Math.ceil(l.length/12)),0))};fit();
+  const fit=()=>growText(d,a);fit();
   a.oninput=()=>{fit();patch(it,{text:a.value})}}
  else if(it.type==='label'){
   d.innerHTML='<textarea aria-label="Text"></textarea><div class="sz"><button type="button" aria-label="Smaller text">−</button><button type="button" aria-label="Bigger text">+</button><button type="button" aria-label="Text style">Aa</button></div>';
   const a=d.querySelector('textarea');
   const get=()=>{const q=(it.k||'hand:auto:1').split(':');return{f:FONTS.some(x=>x[0]===q[0])?q[0]:'hand',c:q[1] in TCOL?q[1]:'auto',s:Math.min(3,Math.max(.5,parseFloat(q[2])||1))}};
-  const fit=()=>{a.rows=Math.max(1,a.value.split('\n').reduce((n,l)=>n+Math.max(1,Math.ceil(l.length/15)),0))};
-  const apply=()=>{const o=get(),F=FONTS.find(x=>x[0]===o.f)||FONTS[0];a.style.fontFamily=F[2];a.style.fontWeight=F[3];a.style.fontStyle=F[4];a.style.color=TCOL[o.c];a.style.fontSize=30*o.s+'px';d.style.width=200*o.s+'px';fit()};
+  const fit=()=>growText(d,a);
+  const apply=()=>{const o=get(),F=FONTS.find(x=>x[0]===o.f)||FONTS[0];a.style.fontFamily=F[2];a.style.fontWeight=F[3];a.style.fontStyle=F[4];a.style.color=TCOL[o.c];a.style.fontSize=30*o.s+'px';d.style.width=200*o.s+'px';d.dataset.bw=200*o.s;fit()};
   const set=o=>{const c=Object.assign(get(),o);patch(it,{k:c.f+':'+c.c+':'+c.s});apply()};
   a.value=it.text||'';a.readOnly=!editing;apply();
   a.oninput=()=>{fit();patch(it,{text:a.value})};
@@ -844,8 +866,13 @@ function fitSheet(sh){
   const x=parseFloat(d.style.left)||0,y=parseFloat(d.style.top)||0;
   d.style.left=Math.max(-40,Math.min(dw-60,x))+'px';
   d.style.top=Math.max(-20,Math.min(dh-60,y))+'px'});
- // Clamping can only shrink the content, so measure once more — the scale
- // may come back up. (Transforms don't affect scrollWidth, so this is stable.)
+ // Text boxes grow to fit their longest line (see growText), so grow
+ // them now that positions are clamped — then re-measure, since a grown
+ // box may widen the page.
+ sc.querySelectorAll('.item.note,.item.phrase,.item.label').forEach(d=>{
+  const a=d.querySelector('textarea');if(a)growText(d,a)});
+ // Growing can only widen the content, so measure once more — the scale
+ // may need to come back down. (Transforms don't affect scrollWidth, so this is stable.)
  FIT=fit();
  sc.style.transform=FIT<1?`scale(${FIT})`:'';
 }
