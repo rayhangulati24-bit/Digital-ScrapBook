@@ -25,6 +25,11 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 #stage.dropping{outline:3px dashed var(--pale);outline-offset:-8px}
 .sheet{position:absolute;inset:0;border-radius:10px;border:3px solid var(--ink);overflow:hidden;transform-origin:left center;backface-visibility:hidden;-webkit-backface-visibility:hidden;touch-action:pan-y;
  background-color:var(--navy2);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+/* The scaler holds every item on the page. fitSheet() below shrinks it
+   (from the top-left corner) just enough that the whole arrangement
+   fits the stage, so a page laid out on a laptop shrinks as one picture
+   on a phone instead of bunching up at the edges. */
+.scaler{position:absolute;inset:0;transform-origin:top left}
 .sheet{--pl:rgba(246,243,236,.14);--pi:#F6F3EC;--bc:#F6F3EC}
 .sheet.light{--pl:rgba(20,33,61,.14);--pi:#14213D;--bc:#14213D}
 .sheet.light .empty{color:#5d7099}
@@ -349,7 +354,7 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 // Bump this on every delivery. It is shown in the status line after login,
 // so you can tell at a glance which version of this file the live site is
 // actually running — the cause of the "new frames not showing" confusion.
-const APP_VERSION='2026-11-11-frames';
+const APP_VERSION='2026-11-12-autofit';
 // NOTE: these cover defaults are only for a brand-new scrapbook. Once a title /
 // subtitle has been saved, it lives in Supabase (settings rows cover_title and
 // cover_sub) and readSettings() loads it over these defaults — so editing the
@@ -642,7 +647,9 @@ async function saveSettingNow(key,value){clearTimeout(timers[key]);
   if(sv)sv.textContent='saved ✓ '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
  }catch(e){if(sv)sv.textContent='save failed — see the message at the top';fail('Couldn’t save “'+key+'”: '+(e.message||e))}}
 async function add(o){const b=$('#stage').getBoundingClientRect();
- const row=Object.assign({page:idx?S.pages[idx-1].id:null,x:30+Math.random()*Math.max(40,b.width-280),y:30+Math.random()*Math.max(40,b.height-300),r:rot(),z:Math.max(0,...S.items.map(i=>i.z||0))+1},o);
+ // New items are placed in design pixels (the stage divided by the fit
+ // scale), so one added on a phone still lands somewhere sensible.
+ const row=Object.assign({page:idx?S.pages[idx-1].id:null,x:30+Math.random()*Math.max(40,b.width/FIT-280),y:30+Math.random()*Math.max(40,b.height/FIT-300),r:rot(),z:Math.max(0,...S.items.map(i=>i.z||0))+1},o);
  const{data,error}=await sb.from('items').insert(row).select().single();
  if(error){alert('Couldn’t save that: '+error.message);return}
  if(!S.items.some(i=>i.id===data.id))S.items.push(data);refresh();
@@ -694,14 +701,16 @@ function sheet(i){
    mi.onclick=()=>{pos().s=Math.max(.5,Math.round(pos().s*.85*100)/100);apply();save()};
    pl.onclick=()=>{pos().s=Math.min(2.5,Math.round(pos().s*1.18*100)/100);apply();save()};
    fb.onclick=()=>openTStyle({min:.5,max:2.5,get:()=>({f:pos().f||(k==='t'?'bold':'hand'),c:pos().c||'auto',s:pos().s}),set:o=>{Object.assign(pos(),o);apply();save()}})});
-  S.items.filter(o=>!o.page).forEach(it=>d.append(el(it)));
+  const sc=document.createElement('div');sc.className='scaler';
+  S.items.filter(o=>!o.page).forEach(it=>sc.append(el(it)));d.append(sc);
   if(ps.bd==='doodle')d.insertAdjacentHTML('afterbegin',PGB);
  }else{const p=S.pages[i-1],items=S.items.filter(o=>o.page===p.id),ps=pstyle(p.id),light=!!LIGHT[ps.bg];
   d.className='sheet pat-'+ps.pat+(light?' light':'');d.style.backgroundColor=BGS[ps.bg]||BGS.navy;
   const bcol=ps.bc==='auto'?(light?'#14213D':'#F6F3EC'):(BCS[ps.bc]||'#F6F3EC');d.style.setProperty('--bc',bcol);
   d.style.border=(BORDERS[ps.bd]||BORDERS.solid)+' '+bcol;
   if(!items.length)d.innerHTML=`<div class="empty">${editing?'a blank page.<br>add a note, a photo or a doodle above.':'(nothing here yet)'}</div>`;
-  items.forEach(it=>d.append(el(it)));
+  const sc=document.createElement('div');sc.className='scaler';
+  items.forEach(it=>sc.append(el(it)));d.append(sc);
   if(ps.bd==='doodle')d.insertAdjacentHTML('afterbegin','<svg class="pgb" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M1 2 C25 0 60 3 99 1 S100 40 98 99 C70 100 30 98 2 99 S0 60 1 2Z"/></svg>');
  }
  return d;
@@ -709,12 +718,10 @@ function sheet(i){
 function el(it){
  const d=document.createElement('div');d.className='item '+it.type;
  const t=`rotate(${it.r}deg)`;d.style.cssText=`left:${it.x}px;top:${it.y}px;z-index:${(it.z||0)+1};transform:${t};--t:${t}`;
- // Items are saved in pixels, so one placed near the right edge on a
- // laptop would sit off-screen on a phone. Draw it clamped into view;
- // the saved position is pulled in the first time you drag it (startDrag).
- const _sb=$('#stage').getBoundingClientRect();
- d.style.left=Math.max(-40,Math.min(_sb.width-60,it.x))+'px';
- d.style.top=Math.max(-20,Math.min(_sb.height-60,it.y))+'px';
+ // Drawn at the saved position as-is; fitSheet() (called once the sheet
+ // is on the page) clamps drawn positions into the design space and
+ // shrinks the whole page to fit the stage. The saved position is pulled
+ // in the first time you drag the item (startDrag).
  if(it.type==='polaroid'){d.className+=' polaroid';d.innerHTML='<i class="tape"></i>'+(it.img_path?'<img alt="">':'<button class="slot" type="button">'+(editing?'tap to add<br>a photo':'')+'</button>')+'<input maxlength="40" aria-label="Caption">';
   if(it.img_path)sign(it.img_path).then(u=>{if(u)d.querySelector('img').src=u});
   else d.querySelector('.slot').onclick=()=>{if(!editing)return;slotTarget=it;$('#file').click()};
@@ -791,13 +798,18 @@ function el(it){
 function startDrag(e,d,it){
  if(!editing)return;
  const b=d.parentElement.getBoundingClientRect();
- // If the item was drawn clamped into view (see el()), snap its saved
- // position to where it is drawn first, so the first drag doesn't jump it.
- it.x=Math.max(-40,Math.min(b.width-60,it.x));it.y=Math.max(-20,Math.min(b.height-60,it.y));
- const ox=e.clientX-it.x-b.left,oy=e.clientY-it.y-b.top;
+ // The item's parent is the .scaler, whose on-screen box is the sheet
+ // shrunk by FIT — divide by FIT to work in the design pixels the item
+ // is saved in. (When the page fits at full size FIT is 1, so this is
+ // exactly the old maths.)
+ const dw=b.width/FIT,dh=b.height/FIT;
+ // If the item was drawn clamped into view (see fitSheet()), snap its
+ // saved position to where it is drawn first, so the first drag doesn't jump it.
+ it.x=Math.max(-40,Math.min(dw-60,it.x));it.y=Math.max(-20,Math.min(dh-60,it.y));
+ const ox=e.clientX-(b.left+it.x*FIT),oy=e.clientY-(b.top+it.y*FIT);
  d.setPointerCapture(e.pointerId);d.classList.add('drag');
  it.z=Math.max(0,...S.items.map(o=>o.z||0))+1;
- const mv=ev=>{it.x=Math.max(-40,Math.min(b.width-60,ev.clientX-b.left-ox));it.y=Math.max(-20,Math.min(b.height-60,ev.clientY-b.top-oy));
+ const mv=ev=>{it.x=Math.max(-40,Math.min(dw-60,(ev.clientX-b.left-ox)/FIT));it.y=Math.max(-20,Math.min(dh-60,(ev.clientY-b.top-oy)/FIT));
   d.style.left=it.x+'px';d.style.top=it.y+'px'};
  const up=()=>{d.classList.remove('drag');d.classList.add('stuck');d.removeEventListener('pointermove',mv);d.removeEventListener('pointerup',up);
   d.style.zIndex=it.z+1;patch(it,{x:it.x,y:it.y,z:it.z});setTimeout(()=>d.classList.remove('stuck'),300)};
@@ -810,6 +822,37 @@ function drag(d,it){
  });
 }
 
+// ---------- auto-fit: the page resizes itself to the screen ----------
+// Items are saved in pixels as laid out on the screen they were placed
+// on, so a page arranged on a laptop is wider than a phone stage.
+// Instead of bunching items up at the edges, shrink the whole page —
+// items, gaps and all — just enough to fit, and never scale up. FIT is
+// the scale the visible page is drawn at; drag, drop and new-item maths
+// divide by it to work back in the saved (design) pixels.
+let FIT=1;
+function fitSheet(sh){
+ sh=sh||document.querySelector('#stage .sheet');if(!sh){FIT=1;return}
+ const sc=sh.querySelector('.scaler');if(!sc){FIT=1;return}
+ const W=sh.clientWidth,H=sh.clientHeight;
+ if(!W||!H){FIT=1;return} // stage not laid out yet (e.g. before login)
+ const fit=()=>Math.min(1,W/Math.max(1,sc.scrollWidth),H/Math.max(1,sc.scrollHeight));
+ FIT=fit();
+ // Clamp drawn positions into the design space (the stage divided by the
+ // scale), so nothing can sit off-screen; dragging pulls the saved spot in.
+ const dw=W/FIT,dh=H/FIT;
+ sc.querySelectorAll('.item').forEach(d=>{
+  const x=parseFloat(d.style.left)||0,y=parseFloat(d.style.top)||0;
+  d.style.left=Math.max(-40,Math.min(dw-60,x))+'px';
+  d.style.top=Math.max(-20,Math.min(dh-60,y))+'px'});
+ // Clamping can only shrink the content, so measure once more — the scale
+ // may come back up. (Transforms don't affect scrollWidth, so this is stable.)
+ FIT=fit();
+ sc.style.transform=FIT<1?`scale(${FIT})`:'';
+}
+// Re-fit when the screen changes size (rotate the phone, resize the window,
+// browser chrome appearing or hiding) — no re-render, just a new scale.
+let rzT=null;addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>fitSheet(),150)});
+
 // ---------- showing + flipping ----------
 function label(){
  $('#lbl').textContent=idx===0?'cover':`${S.pages[idx-1]?S.pages[idx-1].name:''}  ·  ${idx} / ${S.pages.length}`;
@@ -819,20 +862,20 @@ function label(){
  $('#cvUl').textContent='underline: '+(S.cover.ul?'on':'off');
 
 }
-function show(){const st=$('#stage');st.innerHTML='';st.append(sheet(idx));label()}
+function show(){const st=$('#stage');st.innerHTML='';st.append(sheet(idx));fitSheet();label()}
 function refresh(){const st=$('#stage');const old=st.querySelector('.sheet');if(!old||busy){show();return}
- const n=sheet(idx);st.replaceChild(n,old);label()}
+ const n=sheet(idx);st.replaceChild(n,old);fitSheet(n);label()}
 function go(to){
  if(busy||to<0||to>=total()||to===idx)return;
  const st=$('#stage'),old=st.querySelector('.sheet'),dir=to>idx?1:-1;
  idx=to;const nw=sheet(to);label();
- if(reduced||!old){st.innerHTML='';st.append(nw);return}
+ if(reduced||!old){st.innerHTML='';st.append(nw);fitSheet(nw);return}
  busy=true;
  const raf2=f=>requestAnimationFrame(()=>requestAnimationFrame(f));
- if(dir>0){nw.style.zIndex=1;old.style.zIndex=2;st.append(nw);old.classList.add('turning');
+ if(dir>0){nw.style.zIndex=1;old.style.zIndex=2;st.append(nw);fitSheet(nw);old.classList.add('turning');
   raf2(()=>old.style.transform='rotateY(-172deg)');
   setTimeout(()=>{old.remove();busy=false},1900)}
- else{nw.style.zIndex=3;old.style.zIndex=1;nw.style.transform='rotateY(-172deg)';nw.classList.add('turning');st.append(nw);
+ else{nw.style.zIndex=3;old.style.zIndex=1;nw.style.transform='rotateY(-172deg)';nw.classList.add('turning');st.append(nw);fitSheet(nw);
   raf2(()=>nw.style.transform='rotateY(0deg)');
   setTimeout(()=>{old.remove();nw.classList.remove('turning');nw.style.transform='';busy=false},1900)}
 }
@@ -888,7 +931,7 @@ stageEl.addEventListener('drop',e=>{if(!editing||!hasFiles(e))return;e.preventDe
  const files=[...(e.dataTransfer?.files||[])].filter(f=>f.type.startsWith('image/'));
  if(!files.length)return;
  const r=stageEl.getBoundingClientRect();
- files.forEach((f,n)=>{const x=Math.max(10,Math.min(r.width-220,e.clientX-r.left-100+n*24));const y=Math.max(10,Math.min(r.height-240,e.clientY-r.top-110+n*24));addPhotoFile(f,x,y)})});
+ files.forEach((f,n)=>{const x=Math.max(10,Math.min(r.width/FIT-220,(e.clientX-r.left-100)/FIT+n*24));const y=Math.max(10,Math.min(r.height/FIT-240,(e.clientY-r.top-110)/FIT+n*24));addPhotoFile(f,x,y)})});
 
 // doodle pad
 const cv=$('#cv'),cx=cv.getContext('2d');let pen=false;
