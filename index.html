@@ -147,7 +147,26 @@ header{display:flex;gap:10px;align-items:center;justify-content:space-between;pa
 .s-star textarea{min-height:46px;font-size:20px}
 .note.s-speech{width:230px;padding:26px 26px 54px}
 .s-speech::before{clip-path:none;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 2 20 20' preserveAspectRatio='none'%3E%3Cpath d='M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z'/%3E%3C/svg%3E") center/100% 100% no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 2 20 20' preserveAspectRatio='none'%3E%3Cpath d='M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z'/%3E%3C/svg%3E") center/100% 100% no-repeat}
-.s-round textarea,.s-heart textarea,.s-cloud textarea,.s-star textarea,.s-speech textarea,.s-ribbon textarea,.s-ticket textarea,.s-tag textarea{text-align:center}
+.note.s-diamond{width:220px;padding:64px 56px 60px}
+.s-diamond::before{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.note.s-hexagon{width:240px;padding:26px 48px}
+.s-hexagon::before{clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.note.s-oval{width:230px;padding:54px 44px}
+.s-oval::before{clip-path:none;border-radius:50%}
+.note.s-envelope{width:250px;padding:34px 26px 22px}
+.s-envelope::before{clip-path:none;border-radius:6px}
+.s-envelope::after{content:"";position:absolute;inset:0;z-index:-1;background:
+ linear-gradient(to bottom right,transparent calc(50% - 1px),rgba(20,33,61,.35) 50%,transparent calc(50% + 1px)),
+ linear-gradient(to bottom left,transparent calc(50% - 1px),rgba(20,33,61,.35) 50%,transparent calc(50% + 1px));
+ background-size:100% 46%,100% 46%;background-repeat:no-repeat}
+.note.s-arrow{width:250px;padding:20px 54px 20px 22px}
+.s-arrow::before{clip-path:polygon(0 0,78% 0,100% 50%,78% 100%,0 100%)}
+.note.s-burst{width:240px;padding:60px 56px}
+.s-burst::before{clip-path:polygon(100% 50%,84.8% 59.3%,93.3% 75%,75.5% 75.5%,75% 93.3%,59.3% 84.8%,50% 100%,40.7% 84.8%,25% 93.3%,24.5% 75.5%,6.7% 75%,15.2% 59.3%,0 50%,15.2% 40.7%,6.7% 25%,24.5% 24.5%,25% 6.7%,40.7% 15.2%,50% 0,59.3% 15.2%,75% 6.7%,75.5% 24.5%,93.3% 25%,84.8% 40.7%)}
+.s-diamond textarea,.s-burst textarea{min-height:60px}
+.s-hexagon textarea{min-height:80px}
+.s-oval textarea,.s-envelope textarea,.s-arrow textarea{min-height:70px}
+.s-round textarea,.s-heart textarea,.s-cloud textarea,.s-star textarea,.s-speech textarea,.s-ribbon textarea,.s-ticket textarea,.s-tag textarea,.s-diamond textarea,.s-hexagon textarea,.s-oval textarea,.s-burst textarea{text-align:center}
 .shp{position:absolute;bottom:-10px;left:-10px;width:26px;height:26px;border-radius:50%;border:2px solid var(--navy);background:var(--ink);color:var(--navy);font:700 14px/1 sans-serif;cursor:pointer;display:none;z-index:5;padding:0}
 .pickN{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
 .nb{position:relative;height:150px;overflow:hidden;background:none;border:2px dashed var(--pale);border-radius:10px;cursor:pointer;padding:0}
@@ -334,6 +353,8 @@ canvas{background:var(--navy);border:2px dashed var(--pale);border-radius:8px;to
 <dialog id="dlg">
  <canvas id="cv" width="320" height="240"></canvas>
  <p class="lbl">pen colour</p><div class="sw" id="penCol"></div>
+ <p class="lbl">pen size</p><div class="sw" id="penSize"></div>
+ <div class="row"><button class="tool" id="ers" aria-pressed="false">eraser</button><button class="tool" id="undo">undo</button><button class="tool" id="redo">redo</button></div>
  <div class="row"><button class="tool" id="clr">clear</button><button class="tool" id="drop">stick it on the page</button><button class="tool" id="cancel">cancel</button></div>
 </dialog>
 
@@ -354,7 +375,7 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 // Bump this on every delivery. It is shown in the status line after login,
 // so you can tell at a glance which version of this file the live site is
 // actually running — the cause of the "new frames not showing" confusion.
-const APP_VERSION='2026-11-15-textgrow';
+const APP_VERSION='2026-11-16-notedraw';
 // NOTE: these cover defaults are only for a brand-new scrapbook. Once a title /
 // subtitle has been saved, it lives in Supabase (settings rows cover_title and
 // cover_sub) and readSettings() loads it over these defaults — so editing the
@@ -965,12 +986,27 @@ const cv=$('#cv'),cx=cv.getContext('2d');let pen=false;
 cx.strokeStyle=penColor;cx.lineWidth=3.5;cx.lineCap='round';cx.lineJoin='round';
 let penColorKey='cream';
 buildColorSwatches($('#penCol'),()=>penColorKey,c=>{penColorKey=c;penColor=c==='auto'?'#F6F3EC':TCOL[c];cx.strokeStyle=penColor});
+// Pen sizes, eraser, and undo/redo.
+let penSize=3.5,erasing=false;
+const PENSIZES=[[2,'fine'],[3.5,'medium'],[7,'bold'],[12,'chunky']];
+function updPenSize(){document.querySelectorAll('#penSize button').forEach(b=>b.setAttribute('aria-pressed',parseFloat(b.dataset.ps)===penSize))}
+PENSIZES.forEach(([s,name])=>{const b=document.createElement('button');b.type='button';b.className='tool';b.dataset.ps=s;b.textContent='●';b.style.fontSize=Math.round(8+s*1.4)+'px';b.setAttribute('aria-label',name+' pen');b.onclick=()=>{penSize=s;cx.lineWidth=s;setEraser(false);updPenSize()};$('#penSize').append(b)});
+updPenSize();
+function setEraser(on){erasing=on;cx.globalCompositeOperation=on?'destination-out':'source-over';$('#ers').setAttribute('aria-pressed',on)}
+$('#ers').onclick=()=>setEraser(!erasing);
+// Undo keeps a snapshot from before each stroke (and before clearing),
+// so a wobbly line or a cleared pad can be brought back. Redo re-applies it.
+let undoStack=[],redoStack=[];
+function snap(){undoStack.push(cv.toDataURL());if(undoStack.length>30)undoStack.shift();redoStack=[]}
+function restore(url){const im=new Image();im.onload=()=>{const g=cx.globalCompositeOperation;cx.globalCompositeOperation='source-over';cx.clearRect(0,0,cv.width,cv.height);cx.drawImage(im,0,0);cx.globalCompositeOperation=g};im.src=url}
+$('#undo').onclick=()=>{if(!undoStack.length)return;redoStack.push(cv.toDataURL());restore(undoStack.pop())};
+$('#redo').onclick=()=>{if(!redoStack.length)return;undoStack.push(cv.toDataURL());restore(redoStack.pop())};
 const pos=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]};
-cv.onpointerdown=e=>{pen=true;cv.setPointerCapture(e.pointerId);const[x,y]=pos(e);cx.beginPath();cx.moveTo(x,y);cx.lineTo(x+.1,y);cx.stroke()};
+cv.onpointerdown=e=>{snap();pen=true;cv.setPointerCapture(e.pointerId);const[x,y]=pos(e);cx.beginPath();cx.moveTo(x,y);cx.lineTo(x+.1,y);cx.stroke()};
 cv.onpointermove=e=>{if(!pen)return;const[x,y]=pos(e);cx.lineTo(x,y);cx.stroke()};
 cv.onpointerup=()=>pen=false;
-$('#addDoodle').onclick=()=>{cx.clearRect(0,0,cv.width,cv.height);$('#dlg').showModal()};
-$('#clr').onclick=()=>cx.clearRect(0,0,cv.width,cv.height);
+$('#addDoodle').onclick=()=>{cx.clearRect(0,0,cv.width,cv.height);undoStack=[];redoStack=[];setEraser(false);$('#dlg').showModal()};
+$('#clr').onclick=()=>{snap();cx.clearRect(0,0,cv.width,cv.height)};
 $('#cancel').onclick=()=>$('#dlg').close();
 $('#drop').onclick=()=>{cv.toBlob(async b=>{const p=await upload(b,'png');if(p)add({type:'sketch',img_path:p});$('#dlg').close()},'image/png')};
 
@@ -1041,7 +1077,7 @@ $('#styDone').onclick=()=>$('#sty').close();
 $('#styReset').onclick=()=>{const id=sid();if(!id)return;delete S.styles[id];sb.from('settings').delete().eq('key','pstyle:'+id);refresh();updateSty()};
 
 // ---------- note shapes ----------
-const NSHAPES=[['torn','torn paper'],['sticky','sticky note'],['card','index card'],['notebook','notebook page'],['ticket','ticket'],['ribbon','banner'],['tag','tag'],['round','round'],['heart','heart'],['cloud','cloud'],['star','star'],['speech','speech bubble']];
+const NSHAPES=[['torn','torn paper'],['sticky','sticky note'],['card','index card'],['notebook','notebook page'],['ticket','ticket'],['ribbon','banner'],['tag','tag'],['round','round'],['heart','heart'],['cloud','cloud'],['star','star'],['speech','speech bubble'],['diamond','diamond'],['hexagon','hexagon'],['oval','oval'],['envelope','envelope'],['arrow','arrow'],['burst','starburst']];
 let newNotePaper='auto';
 function tintNotePreviews(){const hex=TCOL[newNotePaper]||'';document.querySelectorAll('#nGrid .nb .note').forEach(n=>n.style.setProperty('--np',hex))}
 NSHAPES.forEach(([k,name],n)=>{const b=document.createElement('button');b.type='button';b.className='nb';b.setAttribute('aria-label',name);
